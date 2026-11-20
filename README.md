@@ -2,7 +2,7 @@
 
 Bot que corre **na nuvem (GitHub Actions, grátis)**, sem precisar do teu PC:
 
-1. De 3 em 3 horas procura os clips de GTA 6 mais vistos dos streamers que escolheres na Twitch.
+1. De 3 em 3 horas procura os clips de GTA 6 mais vistos dos streamers que escolheres na **Twitch e/ou na Kick**.
 2. Faz o download do clip e converte-o para vertical (9:16), com:
    - título grande no topo;
    - legendas automáticas (Whisper);
@@ -21,7 +21,9 @@ Para passar a ser 100% automático, muda `approval: true` para `false` no `confi
 2. Carrega em **New repository**, dá-lhe um nome (ex.: `gta6-clipbot`) e escolhe **Public**. Num repositório público os minutos do GitHub Actions são ilimitados. As chaves continuam secretas.
 3. Carrega em **uploading an existing file** e arrasta todos os ficheiros desta pasta, incluindo a pasta `.github`.
 
-## Passo 2 — Twitch (procura de clips)
+## Passo 2 — Twitch (só se usares streamers da Twitch)
+
+A Kick não precisa de chaves; podes saltar este passo se só usares a Kick.
 
 1. Vai a https://dev.twitch.tv/console, faz login e carrega em **Register Your Application**.
 2. Preenche assim:
@@ -53,7 +55,7 @@ No repositório, vai a **Settings → Secrets and variables → Actions → New 
 
 Edita o `config.yaml` no próprio site do GitHub (ícone do lápis):
 
-- `streamers`: os nomes da Twitch. **Usa só streamers que autorizam clips**, por exemplo os que têm campanhas de clippers no Whop (Content Rewards) ou regras de clipping no painel do canal.
+- `streamers`: os nomes na Twitch e/ou na Kick (o que aparece no link do canal). **Usa só streamers que autorizam clips**, por exemplo os que têm campanhas de clippers no Whop (Content Rewards) ou regras de clipping no painel do canal.
 - `watermark.text`: o @ do teu canal.
   - Para usares um logótipo, carrega um PNG (ex.: `assets/logo.png`) e põe o caminho em `watermark.logo`.
 - `schedule`: o fuso horário e as horas de publicação.
@@ -99,6 +101,8 @@ O limite é de cerca de 6 uploads por dia com a quota grátis.
 ---
 
 ## Notas
+
+- **Kick:** a Kick não tem uma API oficial para listar clips, por isso o bot usa o mesmo endpoint que o site kick.com usa. Se a Kick bloquear os pedidos do GitHub (aparece "bloqueio da Cloudflare?" nos logs), diz-me para trocarmos por um serviço de API de terceiros.
 
 - O ficheiro `data/state.json` guarda os clips que já foram usados, aprovados ou publicados. Não o apagues.
 - O GitHub pode atrasar os agendamentos entre 5 e 30 minutos. É normal.

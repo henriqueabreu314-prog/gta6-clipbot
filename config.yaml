@@ -3,17 +3,22 @@
 #  Podes editar este ficheiro diretamente no site do GitHub.
 # ============================================================
 
-# Streamers da Twitch (o nome que aparece no link twitch.tv/NOME).
+# Streamers a seguir, por plataforma (o nome que aparece no link).
+#   Twitch: twitch.tv/NOME      Kick: kick.com/NOME
 # IMPORTANTE: usa só streamers que AUTORIZAM clips do canal deles
-# (programas de clippers no Whop "Content Rewards", regras no painel
-# do canal, ou autorização direta). Assim evitas strikes.
+# (campanhas de clippers no Whop "Content Rewards", programa de
+# clipping da Kick, regras no painel do canal). Assim evitas strikes.
+# Deixa a lista vazia ([]) se não usares uma plataforma.
 streamers:
-  - nome_do_streamer_1
-  - nome_do_streamer_2
+  twitch:
+    - nome_do_streamer_twitch
+  kick:
+    - nome_do_streamer_kick
 
-# Jogo(s) a procurar (nome exato na Twitch).
+# Jogo(s) a procurar (nome da categoria na Twitch / Kick).
 games:
   - "Grand Theft Auto VI"
+  - "GTA VI"
 
 # true  = o bot manda-te cada vídeo para o Telegram com ✅/❌ e só publica os aprovados (opção A)
 # false = tudo automático, sem perguntar (opção B)
@@ -44,19 +49,19 @@ whisper:
   model: "small"          # tiny / base / small (maior = melhor mas mais lento)
   language: "en"          # null = deteção automática
 
-# Textos. Variáveis: {hook} {streamer} {url}
+# Textos. Variáveis: {hook} {streamer} {url} {channel_url}
 text:
   hook_max_chars: 60
   hook_fallback: "GTA 6 moment 😳"
   youtube_title: "{hook} | {streamer} #GTA6 #shorts"
   description: |
-    🎮 Clip from {streamer} – twitch.tv/{streamer}
+    🎮 Clip from {streamer} – {channel_url}
     🔗 Original clip: {url}
 
-    All credit to {streamer}. Go follow them on Twitch!
+    All credit to {streamer}. Go follow them!
 
     #GTA6 #GTAVI #GrandTheftAuto #gaming #shorts
-  tiktok_caption: "{hook} 🎮 Credit: twitch.tv/{streamer} #GTA6 #GTAVI #gaming #fyp"
+  tiktok_caption: "{hook} 🎮 Credit: {channel_url} #GTA6 #GTAVI #gaming #fyp"
   tags: ["GTA 6", "GTA VI", "Grand Theft Auto VI", "GTA 6 clips", "gaming", "shorts"]
 
 # Plataformas. Só funcionam depois de configurares as chaves (ver README).

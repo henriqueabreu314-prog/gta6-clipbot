@@ -157,14 +157,14 @@ def render_clip(clip, cfg, workdir):
         p.unlink(missing_ok=True)
 
     log(f"A descarregar {clip['url']}")
-    download(clip["url"], raw)
+    download(clip["download_url"], raw)
     dur = duration_of(raw)
 
     log("A gerar legendas...")
     words = transcribe(raw, cfg["whisper"]["model"], cfg["whisper"].get("language"))
 
     hook = clip["_hook"]
-    credit = f"🎮 twitch.tv/{clip['broadcaster_name']}"
+    credit = f"🎮 {clip['channel_url']}"
     wm = cfg.get("watermark") or {}
     logo = None
     if wm.get("logo"):

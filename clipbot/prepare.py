@@ -17,7 +17,7 @@ def make_hook(title, cfg):
 
 def make_texts(clip, cfg):
     hook = make_hook(clip["title"], cfg)
-    v = {"hook": hook, "streamer": clip["broadcaster_name"], "url": clip["url"]}
+    v = {"hook": hook, "streamer": clip["streamer"], "url": clip["url"], "channel_url": clip["channel_url"]}
     title = cfg["text"]["youtube_title"].format(**v)
     if len(title) > 100:  # shorten the hook, keep the credit and hashtags
         extra = len(title) - 100
@@ -33,7 +33,7 @@ def make_texts(clip, cfg):
 
 def run(cfg, st, dry_run=False):
     from .render import render_clip
-    from .twitch import find_candidates
+    from .sources import find_candidates
 
     waiting = sum(1 for c in st["clips"].values() if c["status"] in ("pending", "approved"))
     need = cfg["search"]["max_waiting"] - waiting
@@ -53,9 +53,10 @@ def run(cfg, st, dry_run=False):
         texts = make_texts(clip, cfg)
         clip["_hook"] = texts["hook"]
         entry = {
-            "twitch_id": clip["id"], "url": clip["url"], "streamer": clip["broadcaster_name"],
-            "views": clip["view_count"], "video_id": clip.get("video_id"),
-            "vod_offset": clip.get("vod_offset"), "created": now_iso(), **texts,
+            "clip_id": clip["id"], "platform": clip["platform"], "url": clip["url"],
+            "streamer": clip["streamer"], "channel_url": clip["channel_url"], "views": clip["views"],
+            "moment_group": clip.get("moment_group"), "moment_t": clip.get("moment_t"),
+            "created": now_iso(), **texts,
         }
         try:
             video = render_clip(clip, cfg, workdir)
@@ -77,7 +78,7 @@ def run(cfg, st, dry_run=False):
         approval = cfg.get("approval", True)
         caption = (
             f"{'🆕 Novo clip para aprovar' if approval else '📥 Adicionado à fila'}\n"
-            f"👤 {entry['streamer']} · 👁 {entry['views']} views\n"
+            f"👤 {entry['streamer']} ({entry['platform']}) · 👁 {entry['views']} views\n"
             f"🔗 {entry['url']}\n\n"
             f"YouTube: {texts['title']}\n\nTikTok: {texts['caption']}"
         )

@@ -1,8 +1,8 @@
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timezone
 
 import requests
 
-from .common import clip_key, log, need_env
+from .common import log, need_env
 
 API = "https://api.twitch.tv/helix"
 
@@ -38,49 +38,40 @@ class Twitch:
         )
 
 
-def _same_moment(a, b):
-    return (
-        a.get("video_id")
-        and a.get("video_id") == b.get("video_id")
-        and a.get("vod_offset") is not None
-        and b.get("vod_offset") is not None
-        and abs(a["vod_offset"] - b["vod_offset"]) < 60
-    )
-
-
-def find_candidates(cfg, st):
-    """Return new Twitch clips, best first, from the allowed streamers only."""
+def fetch(streamers, games, since):
+    """Clips from Twitch, in the common format used by the bot."""
+    if not streamers:
+        return []
     tw = Twitch()
-    s = cfg["search"]
-    game_ids = tw.game_ids(cfg["games"])
+    game_ids = tw.game_ids(games)
     if not game_ids:
-        log("AVISO: nenhum jogo encontrado com esses nomes na Twitch:", cfg["games"])
-    users = tw.users(cfg["streamers"])
+        log("AVISO (Twitch): nenhum jogo encontrado com estes nomes:", games)
+    users = tw.users(streamers)
     found = {u["login"] for u in users}
-    for name in cfg["streamers"]:
+    for name in streamers:
         if name.lower() not in found:
-            log(f"AVISO: streamer '{name}' não encontrado na Twitch")
+            log(f"AVISO (Twitch): streamer '{name}' não encontrado")
 
-    since = datetime.now(timezone.utc) - timedelta(hours=s["lookback_hours"])
-    used = list(st["clips"].values())
     out = []
     for u in users:
         for c in tw.clips(u["id"], since):
-            if clip_key(c["id"]) in st["clips"]:
-                continue
             if game_ids and c["game_id"] not in game_ids:
                 continue
-            if c["view_count"] < s["min_views"] or c["duration"] < s["min_duration"]:
-                continue
-            if any(_same_moment(c, x) for x in used):
-                continue
-            out.append(c)
-
-    out.sort(key=lambda c: c["view_count"], reverse=True)
-    # Several people often clip the same moment: keep only the most viewed one.
-    unique = []
-    for c in out:
-        if not any(_same_moment(c, x) for x in unique):
-            unique.append(c)
-    log(f"{len(unique)} clips novos encontrados")
-    return unique
+            created = datetime.fromisoformat(c["created_at"].replace("Z", "+00:00"))
+            out.append({
+                "id": c["id"],  # Twitch ids are kept unprefixed (compatible with older state)
+                "platform": "twitch",
+                "url": c["url"],
+                "download_url": c["url"],
+                "title": c["title"],
+                "streamer": c["broadcaster_name"],
+                "channel_url": f"twitch.tv/{u['login']}",
+                "views": c["view_count"],
+                "duration": c["duration"],
+                "created": created.astimezone(timezone.utc).isoformat(),
+                # Used to detect several people clipping the same moment
+                "moment_group": f"twitch:{c['video_id']}" if c.get("video_id") else None,
+                "moment_t": c.get("vod_offset"),
+            })
+    log(f"Twitch: {len(out)} clips de GTA no período")
+    return out

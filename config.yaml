@@ -1,0 +1,70 @@
+# ============================================================
+#  GTA 6 Clip Bot - configuração
+#  Podes editar este ficheiro diretamente no site do GitHub.
+# ============================================================
+
+# Streamers da Twitch (o nome que aparece no link twitch.tv/NOME).
+# IMPORTANTE: usa só streamers que AUTORIZAM clips do canal deles
+# (programas de clippers no Whop "Content Rewards", regras no painel
+# do canal, ou autorização direta). Assim evitas strikes.
+streamers:
+  - nome_do_streamer_1
+  - nome_do_streamer_2
+
+# Jogo(s) a procurar (nome exato na Twitch).
+games:
+  - "Grand Theft Auto VI"
+
+# true  = o bot manda-te cada vídeo para o Telegram com ✅/❌ e só publica os aprovados (opção A)
+# false = tudo automático, sem perguntar (opção B)
+approval: true
+
+# Procura de clips
+search:
+  lookback_hours: 48      # procurar clips criados nas últimas X horas
+  min_views: 100          # ignorar clips com menos visualizações
+  min_duration: 8         # segundos
+  max_waiting: 6          # máximo de vídeos à espera (por aprovar + na fila)
+
+# Horários de publicação, no fuso horário abaixo.
+# Para público internacional/EUA, a hora de Nova Iorque costuma ser a melhor referência.
+schedule:
+  timezone: "America/New_York"
+  slots: ["12:30", "17:30", "20:30"]
+
+# Marca de água do TEU canal
+watermark:
+  text: "@oteucanal"      # deixa "" para não pôr texto
+  logo: ""                # opcional: caminho de um PNG no repositório, ex: "assets/logo.png"
+  opacity: 0.6            # 0 = invisível, 1 = opaco
+  position: "top-right"   # top-left / top-right / bottom-left / bottom-right
+
+# Legendas automáticas (Whisper)
+whisper:
+  model: "small"          # tiny / base / small (maior = melhor mas mais lento)
+  language: "en"          # null = deteção automática
+
+# Textos. Variáveis: {hook} {streamer} {url}
+text:
+  hook_max_chars: 60
+  hook_fallback: "GTA 6 moment 😳"
+  youtube_title: "{hook} | {streamer} #GTA6 #shorts"
+  description: |
+    🎮 Clip from {streamer} – twitch.tv/{streamer}
+    🔗 Original clip: {url}
+
+    All credit to {streamer}. Go follow them on Twitch!
+
+    #GTA6 #GTAVI #GrandTheftAuto #gaming #shorts
+  tiktok_caption: "{hook} 🎮 Credit: twitch.tv/{streamer} #GTA6 #GTAVI #gaming #fyp"
+  tags: ["GTA 6", "GTA VI", "Grand Theft Auto VI", "GTA 6 clips", "gaming", "shorts"]
+
+# Plataformas. Só funcionam depois de configurares as chaves (ver README).
+youtube:
+  enabled: true
+  privacy: "public"       # até a app passar a auditoria da Google, o YouTube força "private"
+  category_id: "20"       # 20 = Gaming
+
+tiktok:
+  enabled: false
+  privacy: "SELF_ONLY"    # apps não auditadas pelo TikTok só podem usar SELF_ONLY (privado)

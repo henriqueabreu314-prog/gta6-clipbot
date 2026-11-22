@@ -36,7 +36,9 @@ def _time_window(hours):
         return "day"
     if hours <= 24 * 7:
         return "week"
-    return "month"
+    if hours <= 24 * 31:
+        return "month"
+    return "all"
 
 
 def _parse_dt(s):

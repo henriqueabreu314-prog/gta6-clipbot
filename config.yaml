@@ -29,8 +29,8 @@ approval: true
 
 # Procura de clips
 search:
-  lookback_hours: 48      # procurar clips criados nas últimas X horas
-  min_views: 100          # ignorar clips com menos visualizações
+  lookback_hours: 168     # procurar clips criados nas últimas X horas (168 = 7 dias, 720 = 30 dias)
+  min_views: 300          # ignorar clips com menos visualizações (mais alto = só os mais virais)
   min_duration: 8         # segundos
   max_waiting: 6          # máximo de vídeos à espera (por aprovar + na fila)
 

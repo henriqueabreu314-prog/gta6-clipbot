@@ -52,10 +52,11 @@
       "title": "XQc stream in kick | xQc #GTA6 #shorts",
       "description": "🎮 Clip from xQc – kick.com/xqc\n🔗 Original clip: https://kick.com/xqc/clips/clip_01M7YM6G7BTRB1AWCWGF48RDB8\n\nAll credit to xQc. Go follow them!\n\n#GTA6 #GTAVI #GrandTheftAuto #gaming #shorts\n",
       "caption": "XQc stream in kick 🎮 Credit: kick.com/xqc #GTA6 #GTAVI #gaming #fyp",
-      "status": "pending",
+      "status": "rerender",
       "approved_at": null,
       "tg_message_id": 7,
-      "tg_file_id": "BAACAgQAAxkDAAMHawKs6psN-4W0cqOZdlVJd3Wh024AAo0eAAJVHBhQppBSgpUrd689BA"
+      "tg_file_id": "BAACAgQAAxkDAAMHawKs6psN-4W0cqOZdlVJd3Wh024AAo0eAAJVHBhQppBSgpUrd689BA",
+      "new_hook": "XQc getting his gallery full"
     },
     "ed7efdd3b47d": {
       "clip_id": "kick:clip_01M7WGF8QY9YKM0JVWE693VTCH",
@@ -77,6 +78,6 @@
       "tg_file_id": "BAACAgQAAxkDAAMIawKtKpheAjQWTennHAadPNrqUo4AAo4eAAJVHBhQPnB8nEFveC09BA"
     }
   },
-  "tg_offset": 436916838,
+  "tg_offset": 436916841,
   "last_slot": null
 }

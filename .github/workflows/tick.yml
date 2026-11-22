@@ -4,6 +4,11 @@ on:
   schedule:
     - cron: "*/20 * * * *"   # de 20 em 20 min: lê os botões do Telegram e publica nas horas marcadas
   workflow_dispatch:
+    inputs:
+      publish_now:
+        description: "Publicar já o próximo vídeo aprovado (sem esperar pelo horário)"
+        type: boolean
+        default: false
 
 permissions:
   contents: write
@@ -36,7 +41,7 @@ jobs:
           TIKTOK_CLIENT_KEY: ${{ secrets.TIKTOK_CLIENT_KEY }}
           TIKTOK_CLIENT_SECRET: ${{ secrets.TIKTOK_CLIENT_SECRET }}
           TIKTOK_REFRESH_TOKEN: ${{ secrets.TIKTOK_REFRESH_TOKEN }}
-        run: python -m clipbot tick
+        run: python -m clipbot tick ${{ inputs.publish_now && '--publish-now' || '' }}
 
       - name: Guardar estado
         run: |

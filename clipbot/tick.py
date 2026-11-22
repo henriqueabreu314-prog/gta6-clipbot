@@ -109,7 +109,10 @@ def publish_next(cfg, st, tg):
                 path, clip["title"], clip["description"], cfg["text"]["tags"],
                 cfg["youtube"]["privacy"], cfg["youtube"]["category_id"])
         except Exception as e:
-            errors.append(f"YouTube: {e}")
+            detail = getattr(e, "content", b"")
+            if isinstance(detail, bytes):
+                detail = detail.decode("utf-8", "replace")
+            errors.append(f"YouTube: {type(e).__name__}: {e} {detail}".strip())
     if use_tt and "tiktok" not in results:
         try:
             results["tiktok"] = tiktok.upload(path, clip["caption"], cfg["tiktok"]["privacy"])
@@ -117,6 +120,7 @@ def publish_next(cfg, st, tg):
             errors.append(f"TikTok: {e}")
 
     clip["attempts"] = clip.get("attempts", 0) + 1
+    clip["last_errors"] = [e[:500] for e in errors] or None  # kept in state.json for diagnosis
     if not errors:
         clip["status"] = "published"
     elif clip["attempts"] >= MAX_ATTEMPTS:
@@ -130,9 +134,14 @@ def publish_next(cfg, st, tg):
     tg.send_message("\n".join(lines), reply_to=clip["tg_message_id"])
 
 
-def run(cfg, st):
+def run(cfg, st, publish_now=False):
     tg = Telegram()
     process_buttons(tg, st)
+    if publish_now:
+        log("Publicar já (pedido manual)")
+        publish_next(cfg, st, tg)
+        save_state(st)
+        return
     slot = due_slot(cfg, st)
     if slot:
         log("Slot de publicação:", slot)

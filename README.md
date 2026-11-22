@@ -2,7 +2,7 @@
 
 Bot que corre **na nuvem (GitHub Actions, grátis)**, sem precisar do teu PC:
 
-1. De 6 em 6 horas procura os clips de GTA 6 mais vistos dos streamers que escolheres na **Twitch e/ou na Kick**.
+1. De 3 em 3 horas procura os clips de GTA 6 mais vistos dos streamers que escolheres na **Twitch e/ou na Kick**.
 2. Faz o download do clip e converte-o para vertical (9:16), com:
    - título grande no topo;
    - legendas automáticas (Whisper);
@@ -18,7 +18,7 @@ Para passar a ser 100% automático, muda `approval: true` para `false` no `confi
 ## Passo 1 — Criar o repositório no GitHub
 
 1. Cria uma conta em https://github.com.
-2. Carrega em **New repository**, dá-lhe um nome (ex.: `gta6-clipbot`) e escolhe **Public**. Num repositório público os minutos do GitHub Actions são ilimitados. Num repositório privado tens 2000 minutos/mês; o bot está afinado para caber nisso.
+2. Carrega em **New repository**, dá-lhe um nome (ex.: `gta6-clipbot`) e escolhe **Public**. Num repositório público os minutos do GitHub Actions são ilimitados.
 3. Carrega em **uploading an existing file** e arrasta todos os ficheiros desta pasta, incluindo a pasta `.github`.
 
 ## Passo 2 — Twitch (só se usares streamers da Twitch)

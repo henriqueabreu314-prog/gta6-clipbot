@@ -27,6 +27,18 @@ def duration_of(path):
     return float(json.loads(out)["format"]["duration"])
 
 
+def load_audio(path, sr=16000):
+    """Decode audio with ffmpeg (avoids PyAV version problems inside faster-whisper)."""
+    import numpy as np
+
+    out = subprocess.run(
+        ["ffmpeg", "-nostdin", "-loglevel", "error", "-i", str(path), "-vn",
+         "-ac", "1", "-ar", str(sr), "-f", "s16le", "-"],
+        capture_output=True, check=True,
+    ).stdout
+    return np.frombuffer(out, np.int16).astype(np.float32) / 32768.0
+
+
 _model = None
 
 
@@ -38,7 +50,7 @@ def transcribe(path, model_size, language):
         log(f"A carregar Whisper '{model_size}'...")
         _model = WhisperModel(model_size, device="cpu", compute_type="int8")
     segments, _ = _model.transcribe(
-        str(path), language=language or None, word_timestamps=True, vad_filter=True
+        load_audio(path), language=language or None, word_timestamps=True, vad_filter=True
     )
     words = []
     for seg in segments:

@@ -63,7 +63,8 @@ def run(cfg, st, dry_run=False):
         except Exception as e:
             log(f"Falhou a renderizar {clip['url']}: {e}")
             if not dry_run:
-                st["clips"][key] = {**entry, "status": "failed", "error": str(e)[:300]}
+                attempts = (st["clips"].get(key) or {}).get("attempts", 0) + 1
+                st["clips"][key] = {**entry, "status": "failed", "attempts": attempts, "error": str(e)[:300]}
                 save_state(st)
             continue
 

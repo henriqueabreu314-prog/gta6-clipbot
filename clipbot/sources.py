@@ -22,6 +22,14 @@ def _same_moment(a, b):
     )
 
 
+MAX_RENDER_ATTEMPTS = 3
+
+
+def _retryable(entry):
+    """New clip, or one that failed to render fewer than 3 times."""
+    return entry is None or (entry["status"] == "failed" and entry.get("attempts", 1) < MAX_RENDER_ATTEMPTS)
+
+
 def find_candidates(cfg, st):
     s = cfg["search"]
     since = datetime.now(timezone.utc) - timedelta(hours=s["lookback_hours"])
@@ -36,10 +44,10 @@ def find_candidates(cfg, st):
         except Exception as e:
             log(f"Erro ao procurar clips na {platform}: {e}")
 
-    used = list(st["clips"].values())
+    used = [x for x in st["clips"].values() if x["status"] != "failed"]
     fresh = [
         c for c in clips
-        if clip_key(c["id"]) not in st["clips"]
+        if _retryable(st["clips"].get(clip_key(c["id"])))
         and c["views"] >= s["min_views"]
         and c["duration"] >= s["min_duration"]
         and not any(_same_moment(c, x) for x in used)

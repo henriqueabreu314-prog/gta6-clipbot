@@ -34,7 +34,7 @@ class Telegram:
         return res["message_id"], res["video"]["file_id"]
 
     def updates(self, offset):
-        return self.call("getUpdates", offset=offset, timeout=0, allowed_updates=["callback_query"])
+        return self.call("getUpdates", offset=offset, timeout=0, allowed_updates=["callback_query", "message"])
 
     def answer(self, callback_id, text):
         try:
@@ -61,5 +61,5 @@ class Telegram:
 
 
 def owner_chat_ok(update, chat_id):
-    msg = update.get("callback_query", {}).get("message", {})
+    msg = update.get("callback_query", {}).get("message") or update.get("message") or {}
     return str(msg.get("chat", {}).get("id")) == str(chat_id)

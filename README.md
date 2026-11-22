@@ -11,6 +11,8 @@ Bot que corre **na nuvem (GitHub Actions, grátis)**, sem precisar do teu PC:
 3. Manda-te o vídeo no **Telegram** com os botões ✅ Publicar e ❌ Rejeitar.
 4. Os aprovados entram numa fila e são publicados nas **horas marcadas** no YouTube Shorts e no TikTok.
 
+**Título fraco?** No Telegram, responde à mensagem do vídeo com o título novo. O bot refaz o vídeo com esse título e manda-te a versão nova para aprovares.
+
 Para passar a ser 100% automático, muda `approval: true` para `false` no `config.yaml`.
 
 ---

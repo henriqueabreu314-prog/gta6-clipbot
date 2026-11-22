@@ -10,12 +10,41 @@ GRACE = timedelta(minutes=90)  # GitHub's scheduler can be late; still publish w
 MAX_ATTEMPTS = 3
 
 
+def _handle_title_reply(tg, st, msg):
+    """Owner replied to a clip's message with text -> use it as the new title."""
+    reply_to = (msg.get("reply_to_message") or {}).get("message_id")
+    text = " ".join((msg.get("text") or "").split())
+    if not reply_to or not text or text.startswith("/"):
+        return
+    key, clip = next(((k, c) for k, c in st["clips"].items() if c.get("tg_message_id") == reply_to), (None, None))
+    if not clip:
+        tg.send_message("Não encontrei esse vídeo. Responde diretamente à mensagem do vídeo.",
+                        reply_to=msg["message_id"])
+        return
+    if clip["status"] not in ("pending", "approved"):
+        tg.send_message("Esse vídeo já foi publicado ou rejeitado; não dá para mudar o título.",
+                        reply_to=msg["message_id"])
+        return
+    clip["new_hook"], clip["status"] = text, "rerender"
+    tg.mark_message(clip["tg_message_id"], "✏️ A refazer com título novo…")
+    tg.send_message(f"✏️ Título novo guardado: \"{text[:80]}\"\n"
+                    "Vou refazer o vídeo e mando-te a versão nova para aprovares "
+                    "(na próxima procura, até 3h — ou corre já o workflow \"Preparar clips\").",
+                    reply_to=msg["message_id"])
+    log(f"{clip['streamer']}: título novo -> {text}")
+
+
 def process_buttons(tg, st):
     updates = tg.updates(st["tg_offset"])
     for u in updates:
         st["tg_offset"] = u["update_id"] + 1
+        if not owner_chat_ok(u, tg.chat_id):
+            continue
+        if u.get("message"):
+            _handle_title_reply(tg, st, u["message"])
+            continue
         cq = u.get("callback_query")
-        if not cq or not owner_chat_ok(u, tg.chat_id):
+        if not cq:
             continue
         action, _, key = (cq.get("data") or "").partition("|")
         clip = st["clips"].get(key)

@@ -17,7 +17,9 @@
       "status": "approved",
       "approved_at": "2026-11-22T09:55:20+00:00",
       "tg_message_id": 5,
-      "tg_file_id": "BAACAgQAAxkDAAMFawKsWRZFk9nrg062_GVC2AABzFeOAAKJHgACVRwYUAqf8S7GUHYXPQQ"
+      "tg_file_id": "BAACAgQAAxkDAAMFawKsWRZFk9nrg062_GVC2AABzFeOAAKJHgACVRwYUAqf8S7GUHYXPQQ",
+      "published": {},
+      "attempts": 1
     },
     "71d00a3f3054": {
       "clip_id": "kick:clip_01M7XQFGWN0AX1GZWRPKT1W1YM",
@@ -118,5 +120,5 @@
     }
   },
   "tg_offset": 436916841,
-  "last_slot": null
+  "last_slot": "2026-11-22T12:30:00-05:00"
 }

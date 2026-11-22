@@ -1,4 +1,4 @@
-name: Testar Telegram
+name: Testar ligações
 
 on:
   workflow_dispatch:
@@ -18,3 +18,10 @@ jobs:
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
         run: python -m clipbot ping
+      - name: Testar chaves do YouTube
+        if: ${{ always() }}
+        env:
+          YT_CLIENT_ID: ${{ secrets.YT_CLIENT_ID }}
+          YT_CLIENT_SECRET: ${{ secrets.YT_CLIENT_SECRET }}
+          YT_REFRESH_TOKEN: ${{ secrets.YT_REFRESH_TOKEN }}
+        run: python -m clipbot ping-youtube

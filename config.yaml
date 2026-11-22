@@ -42,7 +42,7 @@ schedule:
 
 # Marca de água do TEU canal
 watermark:
-  text: ""                # o teu @ (ex: "@gta6clips"); "" = sem marca de água
+  text: "@ViceCityMoments_G_VI"   # o teu @; "" = sem marca de água
   logo: ""                # opcional: caminho de um PNG no repositório, ex: "assets/logo.png"
   opacity: 0.6            # 0 = invisível, 1 = opaco
   position: "top-right"   # top-left / top-right / bottom-left / bottom-right

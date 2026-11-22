@@ -6,7 +6,7 @@ from . import tiktok, youtube
 from .common import ROOT, log, now_iso, save_state
 from .telegram import Telegram, owner_chat_ok
 
-GRACE = timedelta(minutes=90)  # GitHub's scheduler can be late; still publish within this window
+GRACE = timedelta(minutes=150)  # GitHub's scheduler can be late; still publish within this window
 MAX_ATTEMPTS = 3
 
 

@@ -7,13 +7,17 @@ from pathlib import Path
 from .common import log
 
 W, H = 1080, 1920
-MAX_BYTES = 19 * 1024 * 1024  # Telegram bots can only download files up to 20 MB
+MAX_BYTES = 48 * 1024 * 1024  # Telegram accepts bot uploads up to 50 MB
 
 
 def download(url, dest):
     from yt_dlp import YoutubeDL
 
-    opts = {"outtmpl": str(dest), "format": "best[ext=mp4]/best", "quiet": True, "no_warnings": True}
+    opts = {
+        "outtmpl": str(dest), "quiet": True, "no_warnings": True,
+        # Highest resolution available (Kick/Twitch clips come as HLS with several qualities)
+        "format": "bv*+ba/b", "format_sort": ["res", "fps", "br"], "merge_output_format": "mp4",
+    }
     with YoutubeDL(opts) as ydl:
         ydl.download([url])
     return dest
@@ -131,7 +135,8 @@ def _logo_xy(position, margin=50):
 
 def ffmpeg_render(src, ass_name, out, workdir, duration, scale=1.0, logo=None, wm=None):
     # Bitrate chosen so a 60 s clip stays under Telegram's 20 MB download limit.
-    vbit = int(min(3500, (MAX_BYTES * 8 / 1000 / max(duration, 1)) - 192) * 0.92 * scale)
+    # Quality-based encoding (CRF) with a bitrate ceiling so the file stays under MAX_BYTES.
+    vbit = int(min(12000, (MAX_BYTES * 8 / 1000 / max(duration, 1)) - 192) * 0.92 * scale)
     graph = (
         f"[0:v]split=2[a][b];"
         f"[a]scale={W}:{H}:force_original_aspect_ratio=increase,crop={W}:{H},boxblur=30:2,eq=brightness=-0.08[bg];"
@@ -153,8 +158,8 @@ def ffmpeg_render(src, ass_name, out, workdir, duration, scale=1.0, logo=None, w
     cmd = [
         "ffmpeg", "-y", "-loglevel", "error", *inputs,
         "-filter_complex", graph, "-map", "[v]", "-map", "0:a?",
-        "-c:v", "libx264", "-preset", "medium", "-b:v", f"{vbit}k",
-        "-maxrate", f"{vbit}k", "-bufsize", f"{vbit * 2}k", "-r", "30",
+        "-c:v", "libx264", "-preset", "medium", "-crf", "19", "-profile:v", "high",
+        "-maxrate", f"{vbit}k", "-bufsize", f"{vbit * 2}k", "-fpsmax", "60",
         "-c:a", "aac", "-b:a", "160k", "-movflags", "+faststart", str(out),
     ]
     subprocess.run(cmd, cwd=workdir, check=True)
@@ -168,8 +173,18 @@ def render_clip(clip, cfg, workdir):
     for p in (raw, out):
         p.unlink(missing_ok=True)
 
-    log(f"A descarregar {clip['url']}")
-    download(clip["download_url"], raw)
+    # Prefer the clip page (yt-dlp picks the best quality); fall back to the direct stream URL.
+    sources = [u for u in dict.fromkeys([clip.get("url"), clip.get("download_url")]) if u]
+    for i, src in enumerate(sources):
+        try:
+            log(f"A descarregar {src}")
+            raw.unlink(missing_ok=True)
+            download(src, raw)
+            break
+        except Exception as e:
+            if i == len(sources) - 1:
+                raise
+            log(f"Falhou ({e}); a tentar outra fonte")
     dur = duration_of(raw)
 
     log("A gerar legendas...")

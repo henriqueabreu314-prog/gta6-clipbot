@@ -57,6 +57,9 @@ def process_buttons(tg, st):
             tg.mark_message(clip["tg_message_id"], "✅ Aprovado — na fila")
         else:
             clip["status"] = "rejected"
+            if clip.get("hq_asset"):
+                from . import storage
+                storage.delete(clip["hq_asset"])
             tg.answer(cq["id"], "Rejeitado ❌")
             tg.mark_message(clip["tg_message_id"], "❌ Rejeitado")
         log(f"{clip['streamer']}: {clip['status']}")
@@ -100,7 +103,12 @@ def publish_next(cfg, st, tg):
 
     path = ROOT / "work" / "publish.mp4"
     path.parent.mkdir(exist_ok=True)
-    tg.download(clip["tg_file_id"], path)
+    from . import storage
+
+    if clip.get("hq_asset"):
+        storage.load(clip["hq_asset"], path)  # full quality
+    else:
+        tg.download(clip["tg_file_id"], path)  # older clips (max 20 MB)
 
     results, errors = clip.setdefault("published", {}), []
     if use_yt and "youtube" not in results:
@@ -123,6 +131,8 @@ def publish_next(cfg, st, tg):
     clip["last_errors"] = [e[:500] for e in errors] or None  # kept in state.json for diagnosis
     if not errors:
         clip["status"] = "published"
+        if clip.get("hq_asset"):
+            storage.delete(clip["hq_asset"])
     elif clip["attempts"] >= MAX_ATTEMPTS:
         clip["status"] = "failed"
 

@@ -47,11 +47,14 @@ def _send(tg, cfg, st, key, entry, video):
         {"text": "✅ Publicar", "callback_data": f"ok|{key}"},
         {"text": "❌ Rejeitar", "callback_data": f"no|{key}"},
     ] if approval else None
+    from . import storage
+
+    hq_asset = storage.save(video, key)
     msg_id, file_id = tg.send_video(video, caption, buttons)
     st["clips"][key] = {
         **entry, "status": "pending" if approval else "approved",
         "approved_at": None if approval else now_iso(),
-        "tg_message_id": msg_id, "tg_file_id": file_id,
+        "tg_message_id": msg_id, "tg_file_id": file_id, "hq_asset": hq_asset,
     }
     save_state(st)
     log(f"Enviado para o Telegram: {entry['title']}")
@@ -81,7 +84,7 @@ def redo_with_new_titles(cfg, st, tg, workdir):
             save_state(st)
             continue
         entry = {k: v for k, v in e.items() if k not in ("new_hook", "redo_attempts", "tg_message_id",
-                                                         "tg_file_id", "status", "approved_at")}
+                                                         "tg_file_id", "status", "approved_at", "hq_asset")}
         entry.update(texts)
         _send(tg, cfg, st, key, entry, video)
 

@@ -10,9 +10,10 @@ class Telegram:
         self.token, self.chat_id = need_env("TELEGRAM_BOT_TOKEN", "TELEGRAM_CHAT_ID")
         self.base = f"https://api.telegram.org/bot{self.token}"
 
-    def call(self, method, files=None, timeout=60, **params):
+    def call(self, method, files=None, http_timeout=60, **params):
+        # NB: "timeout" in params is a Telegram API parameter (long polling), not the HTTP timeout.
         data = {k: (json.dumps(v) if isinstance(v, (dict, list)) else v) for k, v in params.items() if v is not None}
-        r = requests.post(f"{self.base}/{method}", data=data, files=files, timeout=timeout)
+        r = requests.post(f"{self.base}/{method}", data=data, files=files, timeout=http_timeout)
         body = r.json()
         if not body.get("ok"):
             raise RuntimeError(f"Telegram {method}: {body.get('description')}")
@@ -28,7 +29,7 @@ class Telegram:
     def send_video(self, path, caption, buttons=None):
         markup = {"inline_keyboard": [buttons]} if buttons else None
         with open(path, "rb") as f:
-            res = self.call("sendVideo", files={"video": f}, timeout=300, chat_id=self.chat_id,
+            res = self.call("sendVideo", files={"video": f}, http_timeout=300, chat_id=self.chat_id,
                             caption=caption[:1024], supports_streaming=True, reply_markup=markup)
         return res["message_id"], res["video"]["file_id"]
 

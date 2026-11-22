@@ -34,14 +34,60 @@ def _handle_title_reply(tg, st, msg):
     log(f"{clip['streamer']}: título novo -> {text}")
 
 
+COMMANDS = [
+    ("clips", "Procurar clips novos agora"),
+    ("publicar", "Publicar já o próximo vídeo aprovado"),
+    ("fila", "Ver o que está à espera e na fila"),
+    ("ajuda", "Ver os comandos"),
+]
+
+
+def _queue_summary(st):
+    clips = list(st["clips"].values())
+    pend = [c for c in clips if c["status"] == "pending"]
+    appr = sorted((c for c in clips if c["status"] == "approved"), key=lambda c: c.get("approved_at") or "")
+    redo = [c for c in clips if c["status"] == "rerender"]
+    lines = [f"📋 Por aprovar: {len(pend)} · Na fila: {len(appr)} · A refazer: {len(redo)}"]
+    for i, c in enumerate(appr[:5], 1):
+        lines.append(f"{i}. {c['streamer']}: {c['hook'][:50]}")
+    return "\n".join(lines)
+
+
+def _handle_command(tg, st, msg):
+    """Returns True if the owner asked to publish now."""
+    cmd = (msg.get("text") or "").split()[0].lstrip("/").split("@")[0].lower()
+    reply = msg["message_id"]
+    if cmd == "clips":
+        import subprocess
+        r = subprocess.run(["gh", "workflow", "run", "prepare.yml"], capture_output=True, text=True)
+        if r.returncode == 0:
+            tg.send_message("🔎 A procurar clips novos… chegam em 5–10 minutos.", reply_to=reply)
+        else:
+            tg.send_message(f"⚠️ Não consegui iniciar a procura: {r.stderr.strip()[:300]}", reply_to=reply)
+    elif cmd == "publicar":
+        tg.send_message("📤 A publicar o próximo vídeo aprovado…", reply_to=reply)
+        return True
+    elif cmd == "fila":
+        tg.send_message(_queue_summary(st), reply_to=reply)
+    else:
+        tg.send_message("Comandos:\n" + "\n".join(f"/{c} — {d}" for c, d in COMMANDS)
+                        + "\n\n✏️ Para mudar um título, responde à mensagem do vídeo com o título novo.",
+                        reply_to=reply)
+    return False
+
+
 def process_buttons(tg, st):
+    publish_now = False
     updates = tg.updates(st["tg_offset"])
     for u in updates:
         st["tg_offset"] = u["update_id"] + 1
         if not owner_chat_ok(u, tg.chat_id):
             continue
         if u.get("message"):
-            _handle_title_reply(tg, st, u["message"])
+            if (u["message"].get("text") or "").startswith("/"):
+                publish_now |= _handle_command(tg, st, u["message"])
+            else:
+                _handle_title_reply(tg, st, u["message"])
             continue
         cq = u.get("callback_query")
         if not cq:
@@ -64,6 +110,7 @@ def process_buttons(tg, st):
             tg.mark_message(clip["tg_message_id"], "❌ Rejeitado")
         log(f"{clip['streamer']}: {clip['status']}")
     save_state(st)
+    return publish_now
 
 
 def due_slot(cfg, st):
@@ -146,7 +193,13 @@ def publish_next(cfg, st, tg):
 
 def run(cfg, st, publish_now=False):
     tg = Telegram()
-    process_buttons(tg, st)
+    if not st.get("commands_set"):
+        try:
+            tg.call("setMyCommands", commands=[{"command": c, "description": d} for c, d in COMMANDS])
+            st["commands_set"] = True
+        except Exception as e:
+            log("Falha a registar comandos no Telegram:", e)
+    publish_now = process_buttons(tg, st) or publish_now
     if publish_now:
         log("Publicar já (pedido manual)")
         publish_next(cfg, st, tg)

@@ -12,6 +12,7 @@ on:
 
 permissions:
   contents: write
+  actions: write   # o comando /clips do Telegram inicia o workflow "Preparar clips"
 
 concurrency:
   group: clipbot-state

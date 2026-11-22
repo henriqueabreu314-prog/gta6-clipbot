@@ -76,10 +76,15 @@
       "title": "n3on gets refused entry 4 looking younger than 21 | n3on #GTA6 #shorts",
       "description": "🎮 Clip from n3on – kick.com/n3on\n🔗 Original clip: https://kick.com/n3on/clips/clip_01M7WGF8QY9YKM0JVWE693VTCH\n\nAll credit to n3on. Go follow them!\n\n#GTA6 #GTAVI #GrandTheftAuto #gaming #shorts\n",
       "caption": "n3on gets refused entry 4 looking younger than 21 🎮 Credit: kick.com/n3on #GTA6 #GTAVI #gaming #fyp",
-      "status": "approved",
+      "status": "published",
       "approved_at": "2026-11-22T09:55:21+00:00",
       "tg_message_id": 8,
-      "tg_file_id": "BAACAgQAAxkDAAMIawKtKpheAjQWTennHAadPNrqUo4AAo4eAAJVHBhQPnB8nEFveC09BA"
+      "tg_file_id": "BAACAgQAAxkDAAMIawKtKpheAjQWTennHAadPNrqUo4AAo4eAAJVHBhQPnB8nEFveC09BA",
+      "published": {
+        "youtube": "https://youtube.com/shorts/RKdPlj5h_u0"
+      },
+      "attempts": 1,
+      "last_errors": null
     },
     "97f15c8daaf3": {
       "clip_id": "kick:clip_01M7Y0BPJZ8RPASSWHFQFZR448",
@@ -144,5 +149,5 @@
     }
   },
   "tg_offset": 436916847,
-  "last_slot": "2026-11-22T12:30:00-05:00"
+  "last_slot": "2026-11-22T17:30:00-05:00"
 }

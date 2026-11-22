@@ -2,7 +2,7 @@ name: Preparar clips
 
 on:
   schedule:
-    - cron: "15 */3 * * *"   # de 3 em 3 horas procura clips novos
+    - cron: "15 */6 * * *"   # de 6 em 6 horas procura clips novos (cabe nos 2000 min/mês de um repo privado)
   workflow_dispatch:
     inputs:
       dry_run:

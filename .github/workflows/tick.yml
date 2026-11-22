@@ -2,7 +2,7 @@ name: Aprovar e publicar
 
 on:
   schedule:
-    - cron: "*/20 * * * *"   # de 20 em 20 min: lê os botões do Telegram e publica nas horas marcadas
+    - cron: "5 * * * *"   # de hora a hora: lê os botões do Telegram e publica nas horas marcadas
   workflow_dispatch:
 
 permissions:

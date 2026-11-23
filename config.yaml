@@ -32,7 +32,7 @@ search:
   lookback_hours: 168     # procurar clips criados nas últimas X horas (168 = 7 dias, 720 = 30 dias)
   min_views: 300          # ignorar clips com menos visualizações (mais alto = só os mais virais)
   min_duration: 8         # segundos
-  max_waiting: 6          # máximo de vídeos à espera (por aprovar + na fila)
+  max_waiting: 12         # máximo de vídeos à espera (por aprovar + na fila)
 
 # Horários de publicação, no fuso horário abaixo.
 # Para público internacional/EUA, a hora de Nova Iorque costuma ser a melhor referência.

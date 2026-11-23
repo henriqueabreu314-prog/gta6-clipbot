@@ -57,10 +57,15 @@
       "title": "XQc getting his gallery full | xQc #GTA6 #shorts",
       "description": "🎮 Clip from xQc – kick.com/xqc\n🔗 Original clip: https://kick.com/xqc/clips/clip_01M7YM6G7BTRB1AWCWGF48RDB8\n\nAll credit to xQc. Go follow them!\n\n#GTA6 #GTAVI #GrandTheftAuto #gaming #shorts\n",
       "caption": "XQc getting his gallery full 🎮 Credit: kick.com/xqc #GTA6 #GTAVI #gaming #fyp",
-      "status": "approved",
+      "status": "published",
       "approved_at": "2026-11-23T18:08:21+00:00",
       "tg_message_id": 14,
-      "tg_file_id": "BAACAgQAAxkDAAMOawLnztRD7L3KBtql98IqvGsRgSEAAl0iAAJl6hhQWt8xa77WMro9BA"
+      "tg_file_id": "BAACAgQAAxkDAAMOawLnztRD7L3KBtql98IqvGsRgSEAAl0iAAJl6hhQWt8xa77WMro9BA",
+      "published": {
+        "youtube": "https://youtube.com/shorts/WNi770x7InY"
+      },
+      "attempts": 1,
+      "last_errors": null
     },
     "ed7efdd3b47d": {
       "clip_id": "kick:clip_01M7WGF8QY9YKM0JVWE693VTCH",
@@ -232,7 +237,10 @@
       "hq_asset": "be22456977eb.mp4"
     }
   },
-  "tg_offset": 436916863,
+  "tg_offset": 436916864,
   "last_slot": "2026-11-23T12:30:00-05:00",
-  "commands_set": true
+  "commands_set": true,
+  "events": [
+    "2026-11-23T18:57:53+00:00 mensagem: '/publicar' resposta_a=None"
+  ]
 }

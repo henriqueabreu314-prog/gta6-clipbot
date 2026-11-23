@@ -13,6 +13,8 @@ Bot que corre **na nuvem (GitHub Actions, grátis)**, sem precisar do teu PC:
 
 **Comandos no Telegram** (o bot responde em até 20 min): `/clips` procura clips novos, `/publicar` publica já o próximo aprovado, `/fila` mostra o que está à espera, `/ajuda` lista os comandos.
 
+**Aprovar sem botões:** responde ao vídeo com `✅`, `ok`, `sim` ou `publicar` para aprovar, ou `❌`, `não` ou `rejeitar` para rejeitar.
+
 **Título fraco?** No Telegram, responde à mensagem do vídeo com o título novo. O bot refaz o vídeo com esse título e manda-te a versão nova para aprovares.
 
 Para passar a ser 100% automático, muda `approval: true` para `false` no `config.yaml`.

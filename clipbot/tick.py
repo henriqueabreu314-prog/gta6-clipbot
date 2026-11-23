@@ -10,6 +10,10 @@ GRACE = timedelta(minutes=150)  # GitHub's scheduler can be late; still publish 
 MAX_ATTEMPTS = 3
 
 
+APPROVE_WORDS = {"✅", "ok", "sim", "s", "yes", "y", "publicar", "publica", "aprovar", "aprovado", "aprova", "👍"}
+REJECT_WORDS = {"❌", "não", "nao", "n", "no", "rejeitar", "rejeita", "rejeitado", "apagar", "👎"}
+
+
 def _handle_title_reply(tg, st, msg):
     """Owner replied to a clip's message with text -> use it as the new title."""
     reply_to = (msg.get("reply_to_message") or {}).get("message_id")
@@ -24,6 +28,22 @@ def _handle_title_reply(tg, st, msg):
     if clip["status"] not in ("pending", "approved"):
         tg.send_message("Esse vídeo já foi publicado ou rejeitado; não dá para mudar o título.",
                         reply_to=msg["message_id"])
+        return
+    word = text.lower().strip(" .!")
+    if word in APPROVE_WORDS or word in REJECT_WORDS:
+        approve = word in APPROVE_WORDS
+        if approve and clip["status"] == "approved":
+            tg.send_message("Esse vídeo já está na fila ✅", reply_to=msg["message_id"])
+            return
+        clip["status"] = "approved" if approve else "rejected"
+        if approve:
+            clip["approved_at"] = now_iso()
+        elif clip.get("hq_asset"):
+            from . import storage
+            storage.delete(clip["hq_asset"])
+        tg.mark_message(clip["tg_message_id"], "✅ Aprovado — na fila" if approve else "❌ Rejeitado")
+        tg.send_message("✅ Aprovado — está na fila." if approve else "❌ Rejeitado.", reply_to=msg["message_id"])
+        log(f"{clip['streamer']}: {clip['status']} (por resposta)")
         return
     clip["new_hook"], clip["status"] = text, "rerender"
     tg.mark_message(clip["tg_message_id"], "✏️ A refazer com título novo…")

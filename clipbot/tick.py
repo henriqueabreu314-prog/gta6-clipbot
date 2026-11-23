@@ -79,11 +79,22 @@ def _handle_command(tg, st, msg):
 def process_buttons(tg, st):
     publish_now = False
     updates = tg.updates(st["tg_offset"])
+    events = st.setdefault("events", [])
+
+    def note(text):
+        events.append(f"{now_iso()} {text}")
+        del events[:-40]  # keep the last 40, for diagnosis
+        log(text)
+
     for u in updates:
         st["tg_offset"] = u["update_id"] + 1
+        kind = "callback" if u.get("callback_query") else "message" if u.get("message") else ",".join(u)
         if not owner_chat_ok(u, tg.chat_id):
+            note(f"ignorado ({kind}) de outro chat")
             continue
         if u.get("message"):
+            m = u["message"]
+            note(f"mensagem: {(m.get('text') or '')[:60]!r} resposta_a={(m.get('reply_to_message') or {}).get('message_id')}")
             if (u["message"].get("text") or "").startswith("/"):
                 publish_now |= _handle_command(tg, st, u["message"])
             else:
@@ -94,8 +105,18 @@ def process_buttons(tg, st):
             continue
         action, _, key = (cq.get("data") or "").partition("|")
         clip = st["clips"].get(key)
+        msg_id = (cq.get("message") or {}).get("message_id")
+        note(f"botão {cq.get('data')!r} na msg {msg_id} -> clip {'encontrado: ' + clip['status'] if clip else 'NÃO encontrado'}")
         if action not in ("ok", "no") or not clip or clip["status"] != "pending":
             tg.answer(cq["id"], "Já tratado")
+            if action in ("ok", "no"):
+                why = ("esse vídeo já não existe" if not clip else
+                       f"esse vídeo já está {'na fila' if clip['status'] == 'approved' else clip['status']}")
+                if clip and clip["status"] == "pending":
+                    pass
+                elif clip and clip.get("tg_message_id") != msg_id and clip["status"] == "pending":
+                    why = "esta é uma versão antiga; usa a mensagem mais recente do vídeo"
+                tg.send_message(f"ℹ️ Botão ignorado: {why}.", reply_to=msg_id)
             continue
         if action == "ok":
             clip["status"], clip["approved_at"] = "approved", now_iso()

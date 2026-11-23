@@ -147,6 +147,27 @@
       "approved_at": null,
       "tg_message_id": 23,
       "tg_file_id": "BAACAgQAAxkDAAMXawM7ksagzozL4CHQuXNVxfP7m3wAAgMjAAJl6hhQ7tDTDIQYz4Y9BA"
+    },
+    "abbb2af1628e": {
+      "clip_id": "kick:clip_01M7Q6S9N9NEHVGYND2HA75QXG",
+      "platform": "kick",
+      "url": "https://kick.com/n3on/clips/clip_01M7Q6S9N9NEHVGYND2HA75QXG",
+      "download_url": "https://clips.kick.com/clips/28/clip_01M7Q6S9N9NEHVGYND2HA75QXG/playlist.m3u8",
+      "streamer": "n3on",
+      "channel_url": "kick.com/n3on",
+      "views": 1073,
+      "moment_group": "kick:138538139",
+      "moment_t": 1795001470.214834,
+      "created": "2026-11-23T00:00:03+00:00",
+      "hook": "mission",
+      "title": "mission | n3on #GTA6 #shorts",
+      "description": "🎮 Clip from n3on – kick.com/n3on\n🔗 Original clip: https://kick.com/n3on/clips/clip_01M7Q6S9N9NEHVGYND2HA75QXG\n\nAll credit to n3on. Go follow them!\n\n#GTA6 #GTAVI #GrandTheftAuto #gaming #shorts\n",
+      "caption": "mission 🎮 Credit: kick.com/n3on #GTA6 #GTAVI #gaming #fyp",
+      "status": "pending",
+      "approved_at": null,
+      "tg_message_id": 34,
+      "tg_file_id": "BAACAgQAAxkDAAMiawOCQI9Ipr8FEGvp19TLlQAB12kcAAKHIwACZeoYULx0vAFoT-YPPQQ",
+      "hq_asset": "abbb2af1628e.mp4"
     }
   },
   "tg_offset": 436916852,

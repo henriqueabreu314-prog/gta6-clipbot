@@ -235,6 +235,27 @@
       "tg_message_id": 40,
       "tg_file_id": "BAACAgQAAxkDAAMoawQWQ4QjzjEI8q2tT4ZDn5o4CDcAAjokAAJl6iBQGsq2pDrpTz49BA",
       "hq_asset": "be22456977eb.mp4"
+    },
+    "87a673a32a0a": {
+      "clip_id": "kick:clip_01M7Q5SWYEP2BD84P19BMJ595M",
+      "platform": "kick",
+      "url": "https://kick.com/n3on/clips/clip_01M7Q5SWYEP2BD84P19BMJ595M",
+      "download_url": "https://clips.kick.com/clips/bf/clip_01M7Q5SWYEP2BD84P19BMJ595M/playlist.m3u8",
+      "streamer": "n3on",
+      "channel_url": "kick.com/n3on",
+      "views": 438,
+      "moment_group": "kick:138538139",
+      "moment_t": 1795000567.519626,
+      "created": "2026-11-24T01:18:25+00:00",
+      "hook": "N3on watches the GTA VI opening cutscenes",
+      "title": "N3on watches the GTA VI opening cutscenes | n3on #GTA6 #shorts",
+      "description": "🎮 Clip from n3on – kick.com/n3on\n🔗 Original clip: https://kick.com/n3on/clips/clip_01M7Q5SWYEP2BD84P19BMJ595M\n\nAll credit to n3on. Go follow them!\n\n#GTA6 #GTAVI #GrandTheftAuto #gaming #shorts\n",
+      "caption": "N3on watches the GTA VI opening cutscenes 🎮 Credit: kick.com/n3on #GTA6 #GTAVI #gaming #fyp",
+      "status": "pending",
+      "approved_at": null,
+      "tg_message_id": 52,
+      "tg_file_id": "BAACAgQAAxkDAAM0awTm5kTxDX87bZMjoNOI2A80oRIAAnocAAKEVShQByL6moXywQY9BA",
+      "hq_asset": "87a673a32a0a.mp4"
     }
   },
   "tg_offset": 436916867,

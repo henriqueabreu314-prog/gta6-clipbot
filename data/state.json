@@ -256,6 +256,27 @@
       "tg_message_id": 52,
       "tg_file_id": "BAACAgQAAxkDAAM0awTm5kTxDX87bZMjoNOI2A80oRIAAnocAAKEVShQByL6moXywQY9BA",
       "hq_asset": "87a673a32a0a.mp4"
+    },
+    "bdb6ede4ff0e": {
+      "clip_id": "kick:clip_01M7RQHWTXGT315139X9S2GRK9",
+      "platform": "kick",
+      "url": "https://kick.com/n3on/clips/clip_01M7RQHWTXGT315139X9S2GRK9",
+      "download_url": "https://clips.kick.com/clips/a3/clip_01M7RQHWTXGT315139X9S2GRK9/playlist.m3u8",
+      "streamer": "n3on",
+      "channel_url": "kick.com/n3on",
+      "views": 448,
+      "moment_group": "kick:138538139",
+      "moment_t": 1795052651.056463,
+      "created": "2026-11-25T18:59:56+00:00",
+      "hook": "plastic 😭",
+      "title": "plastic 😭 | n3on #GTA6 #shorts",
+      "description": "🎮 Clip from n3on – kick.com/n3on\n🔗 Original clip: https://kick.com/n3on/clips/clip_01M7RQHWTXGT315139X9S2GRK9\n\nAll credit to n3on. Go follow them!\n\n#GTA6 #GTAVI #GrandTheftAuto #gaming #shorts\n",
+      "caption": "plastic 😭 🎮 Credit: kick.com/n3on #GTA6 #GTAVI #gaming #fyp",
+      "status": "pending",
+      "approved_at": null,
+      "tg_message_id": 62,
+      "tg_file_id": "BAACAgQAAxkDAAM-awcxAVYtT2DMuJYsgJFPjrGTfoIAAqMeAAIbkEBQ7nyqitoL8L09BA",
+      "hq_asset": "bdb6ede4ff0e.mp4"
     }
   },
   "tg_offset": 436916870,

@@ -279,13 +279,14 @@
       "hq_asset": "bdb6ede4ff0e.mp4"
     }
   },
-  "tg_offset": 436916870,
+  "tg_offset": 436916873,
   "last_slot": "2026-11-26T12:30:00-05:00",
   "commands_set": true,
   "events": [
     "2026-11-23T18:57:53+00:00 mensagem: '/publicar' resposta_a=None",
     "2026-11-23T23:15:03+00:00 mensagem: '/clips' resposta_a=None",
     "2026-11-24T07:44:57+00:00 mensagem: '/clips' resposta_a=None",
-    "2026-11-24T07:45:00+00:00 mensagem: '/fila' resposta_a=None"
+    "2026-11-24T07:45:00+00:00 mensagem: '/fila' resposta_a=None",
+    "2026-11-26T18:50:42+00:00 mensagem: '/clips' resposta_a=None"
   ]
 }

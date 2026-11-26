@@ -65,9 +65,15 @@ whisper:
   model: "small"          # tiny / base / small (maior = melhor mas mais lento)
   language: "en"          # null = deteção automática
 
+# Títulos escritos por IA (Google Gemini, grátis). Precisa do secret GEMINI_API_KEY.
+# Sem a chave, ou se falhar, usa o título original do clip.
+titles:
+  enabled: true
+  model: "gemini-2.5-flash"
+
 # Textos. Variáveis: {hook} {streamer} {url} {channel_url}
 text:
-  hook_max_chars: 60
+  hook_max_chars: 70
   hook_fallback: "GTA 6 moment 😳"
   youtube_title: "{hook} | {streamer} #GTA6 #shorts"
   description: |

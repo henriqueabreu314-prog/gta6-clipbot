@@ -139,6 +139,7 @@ def run(cfg, st, dry_run=False):
         key = clip_key(clip["id"])
         texts = make_texts(clip, cfg)
         clip["_hook"] = texts["hook"]
+        clip["_ai_title"] = True  # Gemini may rewrite the hook once the transcript exists
         entry = {
             "clip_id": clip["id"], "platform": clip["platform"], "url": clip["url"],
             "download_url": clip["download_url"],
@@ -155,6 +156,11 @@ def run(cfg, st, dry_run=False):
                 st["clips"][key] = {**entry, "status": "failed", "attempts": attempts, "error": str(e)[:300]}
                 save_state(st)
             continue
+
+        if clip["_hook"] != texts["hook"]:
+            texts = make_texts(clip, cfg, hook=clip["_hook"])
+            entry.update(texts)
+            entry["original_title"] = clip["title"]
 
         if dry_run:
             outdir.mkdir(exist_ok=True)

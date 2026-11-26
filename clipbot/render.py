@@ -190,6 +190,9 @@ def render_clip(clip, cfg, workdir):
     log("A gerar legendas...")
     words = transcribe(raw, cfg["whisper"]["model"], cfg["whisper"].get("language"))
 
+    if clip.get("_ai_title"):
+        from .titles import make_hook as ai_hook
+        clip["_hook"] = ai_hook(clip, words, cfg) or clip["_hook"]
     hook = clip["_hook"]
     credit = f"🎮 {clip['channel_url']}"
     wm = cfg.get("watermark") or {}

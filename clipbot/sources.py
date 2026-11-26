@@ -26,8 +26,10 @@ MAX_RENDER_ATTEMPTS = 3
 
 
 def _retryable(entry):
-    """New clip, or one that failed to render fewer than 3 times."""
-    return entry is None or (entry["status"] == "failed" and entry.get("attempts", 1) < MAX_RENDER_ATTEMPTS)
+    """New clip, an expired one, or one that failed to render fewer than 3 times."""
+    if entry is None or entry["status"] == "expired":  # expired = never reviewed; offer it again
+        return True
+    return entry["status"] == "failed" and entry.get("attempts", 1) < MAX_RENDER_ATTEMPTS
 
 
 def find_candidates(cfg, st):
@@ -44,7 +46,7 @@ def find_candidates(cfg, st):
         except Exception as e:
             log(f"Erro ao procurar clips na {platform}: {e}")
 
-    used = [x for x in st["clips"].values() if x["status"] != "failed"]
+    used = [x for x in st["clips"].values() if x["status"] not in ("failed", "expired")]
     fresh = [
         c for c in clips
         if _retryable(st["clips"].get(clip_key(c["id"])))

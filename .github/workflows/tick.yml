@@ -15,7 +15,7 @@ permissions:
   actions: write   # o comando /clips do Telegram inicia o workflow "Preparar clips"
 
 concurrency:
-  group: clipbot-state
+  group: clipbot-tick
   cancel-in-progress: false
 
 jobs:
@@ -46,11 +46,4 @@ jobs:
         run: python -m clipbot tick ${{ inputs.publish_now && '--publish-now' || '' }}
 
       - name: Guardar estado
-        run: |
-          git config user.name "clipbot"
-          git config user.email "clipbot@users.noreply.github.com"
-          git add data/state.json
-          if ! git diff --cached --quiet; then
-            git commit -q -m "estado: aprovações/publicações"
-            git pull -q --rebase && git push -q
-          fi
+        run: python -m clipbot.savestate 'estado - aprovações/publicações'

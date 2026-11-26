@@ -43,7 +43,8 @@ search:
   lookback_hours: 168     # procurar clips criados nas últimas X horas (168 = 7 dias, 720 = 30 dias)
   min_views: 100          # ignorar clips com menos visualizações (mais alto = só os mais virais)
   min_duration: 8         # segundos
-  max_waiting: 12         # máximo de vídeos à espera (por aprovar + na fila)
+  max_waiting: 60         # máximo de vídeos à espera (por aprovar + na fila)
+  per_run: 10             # máximo de clips novos editados em cada procura (cada um demora ~2-3 min)
   expire_hours: 48        # vídeos por aprovar há mais de X horas expiram e dão lugar a novos
 
 # Horários de publicação, no fuso horário abaixo.

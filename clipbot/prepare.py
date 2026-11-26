@@ -127,7 +127,7 @@ def run(cfg, st, dry_run=False):
         redo_with_new_titles(cfg, st, tg, workdir)
 
     waiting = sum(1 for c in st["clips"].values() if c["status"] in ("pending", "approved", "rerender"))
-    need = cfg["search"]["max_waiting"] - waiting
+    need = min(cfg["search"]["max_waiting"] - waiting, cfg["search"].get("per_run", 10))
     if need <= 0 and not dry_run:
         log(f"Já há {waiting} vídeos à espera; nada a fazer.")
         return

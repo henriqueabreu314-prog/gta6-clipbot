@@ -1,6 +1,7 @@
 import hashlib
 import json
 import os
+import re
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -10,8 +11,38 @@ ROOT = Path(__file__).resolve().parent.parent
 STATE_PATH = ROOT / "data" / "state.json"
 
 
+DIAG = []  # notes from this run, saved in state.json so problems can be diagnosed without the logs
+
+
 def log(*args):
     print(f"[{datetime.now(timezone.utc):%H:%M:%S}]", *args, flush=True)
+
+
+_SECRET_PATTERNS = [
+    re.compile(r"AIza[0-9A-Za-z_\-]{20,}"),                 # Google API keys
+    re.compile(r"(?i)(key|token|secret|password)=[^&\s]+"),  # credentials in URLs
+    re.compile(r"\d{8,10}:[0-9A-Za-z_\-]{30,}"),           # Telegram bot tokens
+    re.compile(r"github_pat_[0-9A-Za-z_]+|gh[pousr]_[0-9A-Za-z]{20,}"),
+    re.compile(r"GOCSPX-[0-9A-Za-z_\-]+|1//0[0-9A-Za-z_\-]{20,}|ya29\.[0-9A-Za-z_\-\.]+"),
+]
+
+
+def redact(text):
+    text = str(text)
+    for pat in _SECRET_PATTERNS:
+        text = pat.sub("[escondido]", text)
+    for name in ("GEMINI_API_KEY", "TELEGRAM_BOT_TOKEN", "TWITCH_CLIENT_SECRET", "YT_CLIENT_SECRET",
+                 "YT_REFRESH_TOKEN", "TIKTOK_CLIENT_SECRET", "TIKTOK_REFRESH_TOKEN", "GH_TOKEN"):
+        value = os.environ.get(name)
+        if value and len(value) > 6:
+            text = text.replace(value, "[escondido]")
+    return text
+
+
+def diag(*args):
+    text = redact(" ".join(str(a) for a in args))
+    log(text)
+    DIAG.append(text[:300])
 
 
 def now_iso():

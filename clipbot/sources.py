@@ -2,7 +2,7 @@
 from datetime import datetime, timedelta, timezone
 
 from . import kick, twitch
-from .common import clip_key, log
+from .common import clip_key, diag, log
 
 
 def streamers_by_platform(cfg):
@@ -44,9 +44,9 @@ def find_candidates(cfg, st):
         try:
             clips += mod.fetch(names[platform], cfg["games"], since)
         except SystemExit as e:  # missing secrets for one platform shouldn't stop the other
-            log(f"{platform}: {e}")
+            diag(f"{platform}: {e}")
         except Exception as e:
-            log(f"Erro ao procurar clips na {platform}: {e}")
+            diag(f"Erro ao procurar clips na {platform}: {e}")
 
     used = [x for x in st["clips"].values() if x["status"] not in ("failed", "expired")]
     fresh = [
@@ -63,5 +63,5 @@ def find_candidates(cfg, st):
     for c in fresh:
         if not any(_same_moment(c, x) for x in unique):
             unique.append(c)
-    log(f"{len(unique)} clips novos para usar")
+    diag(f"{len(unique)} clips novos para usar (de {len(clips)} encontrados)")
     return unique

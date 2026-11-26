@@ -289,7 +289,8 @@ def publish_next(cfg, st, tg):
             errors.append(f"TikTok: {e}")
 
     clip["attempts"] = clip.get("attempts", 0) + 1
-    clip["last_errors"] = [e[:500] for e in errors] or None  # kept in state.json for diagnosis
+    from .common import redact
+    clip["last_errors"] = [redact(e)[:500] for e in errors] or None  # kept in state.json for diagnosis
     if not errors:
         clip["status"] = "published"
         if clip.get("hq_asset"):

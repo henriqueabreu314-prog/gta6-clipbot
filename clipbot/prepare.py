@@ -3,7 +3,7 @@ import re
 import shutil
 from pathlib import Path
 
-from .common import ROOT, clip_key, log, now_iso, save_state
+from .common import DIAG, ROOT, clip_key, log, now_iso, save_state
 
 
 def make_hook(title, cfg):
@@ -120,6 +120,15 @@ def redo_with_new_titles(cfg, st, tg, workdir):
 
 
 def run(cfg, st, dry_run=False):
+    try:
+        _run(cfg, st, dry_run)
+    finally:
+        if not dry_run:
+            st["last_prepare"] = {"at": now_iso(), "notes": DIAG[-60:]}
+            save_state(st)
+
+
+def _run(cfg, st, dry_run=False):
     from .render import render_clip
     from .sources import find_candidates
 
@@ -167,7 +176,8 @@ def run(cfg, st, dry_run=False):
             log(f"Falhou a renderizar {clip['url']}: {e}")
             if not dry_run:
                 attempts = (st["clips"].get(key) or {}).get("attempts", 0) + 1
-                st["clips"][key] = {**entry, "status": "failed", "attempts": attempts, "error": str(e)[:300]}
+                from .common import redact
+                st["clips"][key] = {**entry, "status": "failed", "attempts": attempts, "error": redact(e)[:300]}
                 save_state(st)
             continue
 

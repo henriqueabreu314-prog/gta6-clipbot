@@ -8,7 +8,7 @@ import re
 
 import requests
 
-from .common import env, log
+from .common import diag, env, log
 
 API = "https://generativelanguage.googleapis.com/v1beta"
 _model_cache = {}
@@ -41,6 +41,11 @@ Write 5 different options in different styles, then pick the one most likely to 
 Return JSON: {{"options": ["...", "...", "...", "...", "..."], "best": "<the chosen option, copied exactly>"}}"""
 
 
+def _headers():
+    # The key goes in a header, never in the URL (URLs end up in error messages)
+    return {"x-goog-api-key": env("GEMINI_API_KEY") or ""}
+
+
 def configured():
     return bool(env("GEMINI_API_KEY"))
 
@@ -48,8 +53,7 @@ def configured():
 def _pick_model(preferred):
     if preferred in _model_cache:
         return _model_cache[preferred]
-    key = env("GEMINI_API_KEY")
-    r = requests.get(f"{API}/models", params={"key": key, "pageSize": 200}, timeout=30)
+    r = requests.get(f"{API}/models", headers=_headers(), params={"pageSize": 200}, timeout=30)
     r.raise_for_status()
     names = [m["name"].split("/", 1)[1] for m in r.json().get("models", [])
              if "generateContent" in m.get("supportedGenerationMethods", [])]
@@ -58,7 +62,7 @@ def _pick_model(preferred):
     else:  # model renamed/retired: use the newest "flash" model available
         flash = sorted((n for n in names if "flash" in n and "preview" not in n and "exp" not in n), reverse=True)
         choice = (flash or names)[0]
-        log(f"Gemini: modelo '{preferred}' indisponível, a usar '{choice}'")
+        diag(f"Gemini: modelo '{preferred}' indisponível, a usar '{choice}'")
     _model_cache[preferred] = choice
     return choice
 
@@ -74,6 +78,7 @@ def _clean(text, max_chars):
 def make_hook(clip, words, cfg):
     """Return an AI-written hook, or None to keep the original title."""
     if not configured():
+        diag("Gemini: secret GEMINI_API_KEY não está definido")
         return None
     tcfg = cfg.get("titles") or {}
     if tcfg.get("enabled", True) is False:
@@ -86,7 +91,7 @@ def make_hook(clip, words, cfg):
         model = _pick_model(tcfg.get("model", "gemini-2.5-flash"))
         r = requests.post(
             f"{API}/models/{model}:generateContent",
-            params={"key": env("GEMINI_API_KEY")},
+            headers=_headers(),
             json={"contents": [{"parts": [{"text": prompt}]}],
                   "generationConfig": {"responseMimeType": "application/json", "temperature": 1.0}},
             timeout=60,
@@ -101,5 +106,9 @@ def make_hook(clip, words, cfg):
         log(f"Título IA: {title}")
         return title
     except Exception as e:
-        log(f"Gemini falhou ({str(e)[:200]}); a usar o título original")
+        detail = ""
+        resp = getattr(e, "response", None)
+        if resp is not None:
+            detail = (resp.text or "")[:300]
+        diag(f"Gemini falhou ({str(e)[:200]} {detail}); a usar o título original")
         return None

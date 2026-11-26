@@ -9,7 +9,7 @@ we use curl_cffi, which makes the request look like a normal Chrome browser.
 import time
 from datetime import datetime, timezone
 
-from .common import log
+from .common import diag, log
 
 BASE = "https://kick.com/api/v2"
 
@@ -58,11 +58,11 @@ def _get_clips(sess, slug, window):
         if r.status_code == 200:
             return r.json().get("clips", [])
         if r.status_code == 404:
-            log(f"AVISO (Kick): canal '{slug}' não encontrado")
+            diag(f"AVISO (Kick): canal '{slug}' não encontrado")
             return []
         log(f"Kick respondeu {r.status_code} para '{slug}' (tentativa {attempt + 1}/3)")
         time.sleep(3 * (attempt + 1))
-    log(f"AVISO (Kick): não foi possível ler os clips de '{slug}' (bloqueio da Cloudflare?)")
+    diag(f"AVISO (Kick): não foi possível ler os clips de '{slug}' (bloqueio da Cloudflare?)")
     return []
 
 
@@ -109,5 +109,5 @@ def fetch(streamers, games, since):
                 "moment_t": created.timestamp() if created else None,
             })
         time.sleep(1)  # be gentle with kick.com
-    log(f"Kick: {len(out)} clips de GTA no período")
+    diag(f"Kick: {len(out)} clips de GTA no período")
     return out

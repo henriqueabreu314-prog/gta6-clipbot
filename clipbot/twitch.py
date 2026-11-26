@@ -2,7 +2,7 @@ from datetime import datetime, timezone
 
 import requests
 
-from .common import log, need_env
+from .common import diag, log, need_env
 
 API = "https://api.twitch.tv/helix"
 
@@ -45,12 +45,12 @@ def fetch(streamers, games, since):
     tw = Twitch()
     game_ids = tw.game_ids(games)
     if not game_ids:
-        log("AVISO (Twitch): nenhum jogo encontrado com estes nomes:", games)
+        diag("AVISO (Twitch): nenhum jogo encontrado com estes nomes:", games)
     users = tw.users(streamers)
     found = {u["login"] for u in users}
     for name in streamers:
         if name.lower() not in found:
-            log(f"AVISO (Twitch): streamer '{name}' não encontrado")
+            diag(f"AVISO (Twitch): streamer '{name}' não encontrado")
 
     out = []
     for u in users:
@@ -73,5 +73,5 @@ def fetch(streamers, games, since):
                 "moment_group": f"twitch:{c['video_id']}" if c.get("video_id") else None,
                 "moment_t": c.get("vod_offset"),
             })
-    log(f"Twitch: {len(out)} clips de GTA no período")
+    diag(f"Twitch: {len(out)} clips de GTA no período (jogos {sorted(game_ids)}, {len(users)} canais)")
     return out

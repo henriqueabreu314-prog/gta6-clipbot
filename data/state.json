@@ -280,7 +280,7 @@
     }
   },
   "tg_offset": 436916870,
-  "last_slot": "2026-11-25T20:30:00-05:00",
+  "last_slot": "2026-11-26T12:30:00-05:00",
   "commands_set": true,
   "events": [
     "2026-11-23T18:57:53+00:00 mensagem: '/publicar' resposta_a=None",

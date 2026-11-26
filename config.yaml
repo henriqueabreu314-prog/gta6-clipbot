@@ -13,10 +13,20 @@ streamers:
   twitch:
     - ohnepixel
     - xqc
+    - kaicenat
+    - summit1g
+    - sodapoppin
+    - moistcr1tikal
+    - jynxzi
+    - caseoh_
+    - zackrawrr
+    - lacy
+    - hasanabi
   kick:
     - n3on
     - xqc
     - theburntpeanut
+    - adinross
 
 # Jogo(s) a procurar (nome da categoria na Twitch / Kick).
 games:

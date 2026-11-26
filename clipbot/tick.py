@@ -64,12 +64,21 @@ COMMANDS = [
 
 def _queue_summary(st):
     clips = list(st["clips"].values())
-    pend = [c for c in clips if c["status"] == "pending"]
+    pend = sorted((c for c in clips if c["status"] == "pending"), key=lambda c: c.get("created") or "")
     appr = sorted((c for c in clips if c["status"] == "approved"), key=lambda c: c.get("approved_at") or "")
     redo = [c for c in clips if c["status"] == "rerender"]
     lines = [f"📋 Por aprovar: {len(pend)} · Na fila: {len(appr)} · A refazer: {len(redo)}"]
-    for i, c in enumerate(appr[:5], 1):
-        lines.append(f"{i}. {c['streamer']}: {c['hook'][:50]}")
+    if appr:
+        lines.append("\n✅ Na fila (saem por esta ordem):")
+        lines += [f"{i}. {c['streamer']}: {c['hook'][:50]}" for i, c in enumerate(appr[:10], 1)]
+    if pend:
+        lines.append("\n🕐 À espera da tua aprovação (responde 'publicar' ao vídeo):")
+        lines += [f"• {c['streamer']}: {c['hook'][:50]}" for c in pend[:15]]
+        if len(pend) > 15:
+            lines.append(f"… e mais {len(pend) - 15}")
+    if redo:
+        lines.append("\n✏️ A refazer com título novo:")
+        lines += [f"• {c['streamer']}: {c.get('new_hook', c['hook'])[:50]}" for c in redo]
     return "\n".join(lines)
 
 
@@ -79,19 +88,25 @@ def _handle_command(tg, st, msg):
     reply = msg["message_id"]
     if cmd == "clips":
         import subprocess
-        r = subprocess.run(["gh", "workflow", "run", "prepare.yml"], capture_output=True, text=True)
+        r = subprocess.run(["gh", "workflow", "run", "prepare.yml", "--ref", "main"], capture_output=True, text=True)
         if r.returncode == 0:
             tg.send_message("🔎 A procurar clips novos… chegam em 5–10 minutos.", reply_to=reply)
         else:
             tg.send_message(f"⚠️ Não consegui iniciar a procura: {r.stderr.strip()[:300]}", reply_to=reply)
     elif cmd == "publicar":
+        if not any(c["status"] == "approved" for c in st["clips"].values()):
+            tg.send_message("A fila está vazia: não há vídeos aprovados.\n"
+                            "Aprova um respondendo 'publicar' à mensagem do vídeo, e depois envia /publicar.",
+                            reply_to=reply)
+            return False
         tg.send_message("📤 A publicar o próximo vídeo aprovado…", reply_to=reply)
         return True
     elif cmd == "fila":
         tg.send_message(_queue_summary(st), reply_to=reply)
     else:
         tg.send_message("Comandos:\n" + "\n".join(f"/{c} — {d}" for c, d in COMMANDS)
-                        + "\n\n✏️ Para mudar um título, responde à mensagem do vídeo com o título novo.",
+                        + "\n\nNo vídeo (responde à mensagem dele):\n"
+                          "• publicar / ok / ✅ → aprovar\n• não / ❌ → rejeitar\n• qualquer outro texto → título novo",
                         reply_to=reply)
     return False
 
@@ -173,7 +188,10 @@ def publish_next(cfg, st, tg):
     )
     if not queue:
         log("Hora de publicar, mas a fila está vazia.")
-        tg.send_message("⏰ Hora de publicar, mas não há vídeos aprovados na fila.")
+        pend = sum(1 for c in st["clips"].values() if c["status"] == "pending")
+        tg.send_message("⏰ Era hora de publicar, mas não há vídeos aprovados."
+                        + (f"\nTens {pend} à espera: responde 'publicar' aos que gostares para saírem no próximo horário."
+                           if pend else "\nEnvia /clips para procurar clips novos."))
         return
     clip = queue[0]
 

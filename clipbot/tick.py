@@ -14,6 +14,44 @@ APPROVE_WORDS = {"✅", "ok", "sim", "s", "yes", "y", "publicar", "publica", "ap
 REJECT_WORDS = {"❌", "não", "nao", "n", "no", "rejeitar", "rejeita", "rejeitado", "apagar", "👎"}
 
 
+def _recover_from_message(st, original):
+    """Rebuild a clip whose record was lost, from the video message the bot sent.
+
+    The caption has the clip link and the streamer, which is enough to re-render it.
+    """
+    import re
+
+    from .common import clip_key
+
+    caption = original.get("caption") or ""
+    video = original.get("video") or {}
+    m_url = re.search(r"🔗 (https?://\S+)", caption)
+    m_who = re.search(r"👤 (.+?) \((twitch|kick)\) · 👁 (\d+)", caption)
+    if not (m_url and m_who and video.get("file_id")):
+        return None, None
+    url = m_url.group(1)
+    platform = m_who.group(2)
+    m_kick = re.search(r"kick\.com/([\w-]+)/clips/(clip_[\w-]+)", url)
+    if platform == "kick" and m_kick:
+        clip_id, channel = f"kick:{m_kick.group(2)}", f"kick.com/{m_kick.group(1)}"
+    else:
+        clip_id = url.rstrip("/").rsplit("/", 1)[-1]
+        channel = f"twitch.tv/{m_who.group(1).lower()}"
+    m_title = re.search(r"YouTube: (.+)", caption)
+    hook = (m_title.group(1).split(" | ")[0] if m_title else "GTA 6 moment").strip()
+    key = clip_key(clip_id)
+    old = st["clips"].get(key) or {}
+    clip = {**old, "clip_id": clip_id, "platform": platform, "url": url, "download_url": url,
+            "streamer": m_who.group(1), "channel_url": channel, "views": int(m_who.group(3)),
+            "hook": hook, "title": m_title.group(1) if m_title else hook,
+            "description": old.get("description", ""), "caption": old.get("caption", hook),
+            "created": now_iso(), "status": "pending", "tg_message_id": original.get("message_id"),
+            "tg_file_id": video["file_id"], "recovered": True}
+    st["clips"][key] = clip
+    log(f"Clip recuperado da mensagem {original.get('message_id')}: {url}")
+    return key, clip
+
+
 def _handle_title_reply(tg, st, msg):
     """Owner replied to a clip's message with text -> use it as the new title."""
     reply_to = (msg.get("reply_to_message") or {}).get("message_id")
@@ -21,6 +59,8 @@ def _handle_title_reply(tg, st, msg):
     if not reply_to or not text or text.startswith("/"):
         return
     key, clip = next(((k, c) for k, c in st["clips"].items() if c.get("tg_message_id") == reply_to), (None, None))
+    if not clip:
+        key, clip = _recover_from_message(st, msg.get("reply_to_message") or {})
     if not clip:
         tg.send_message("Não encontrei esse vídeo. Responde diretamente à mensagem do vídeo.",
                         reply_to=msg["message_id"])
@@ -140,6 +180,9 @@ def process_buttons(tg, st):
             continue
         action, _, key = (cq.get("data") or "").partition("|")
         clip = st["clips"].get(key)
+        if not clip and action in ("ok", "no"):
+            rkey, clip = _recover_from_message(st, cq.get("message") or {})
+            key = rkey or key
         msg_id = (cq.get("message") or {}).get("message_id")
         note(f"botão {cq.get('data')!r} na msg {msg_id} -> clip {'encontrado: ' + clip['status'] if clip else 'NÃO encontrado'}")
         if action not in ("ok", "no") or not clip or clip["status"] != "pending":
@@ -194,6 +237,9 @@ def publish_next(cfg, st, tg):
                            if pend else "\nEnvia /clips para procurar clips novos."))
         return
     clip = queue[0]
+    if not clip.get("description"):  # recovered clips: rebuild the texts from the config templates
+        from .prepare import make_texts
+        clip.update(make_texts(clip, cfg, hook=clip["hook"]))
 
     use_yt = cfg["youtube"]["enabled"] and youtube.configured()
     use_tt = cfg["tiktok"]["enabled"] and tiktok.configured()

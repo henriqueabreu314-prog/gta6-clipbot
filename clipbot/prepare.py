@@ -60,6 +60,31 @@ def _send(tg, cfg, st, key, entry, video):
     log(f"Enviado para o Telegram: {entry['title']}")
 
 
+def expire_old(cfg, st, tg):
+    """Clips nobody approved within N hours make room for fresh ones."""
+    from datetime import datetime, timedelta, timezone
+
+    from . import storage
+
+    hours = cfg["search"].get("expire_hours", 48)
+    limit = datetime.now(timezone.utc) - timedelta(hours=hours)
+    for e in st["clips"].values():
+        if e["status"] != "pending":
+            continue
+        try:
+            created = datetime.fromisoformat(e["created"])
+        except (KeyError, ValueError):
+            continue
+        if created < limit:
+            e["status"] = "expired"
+            if e.get("hq_asset"):
+                storage.delete(e["hq_asset"])
+            if e.get("tg_message_id"):
+                tg.mark_message(e["tg_message_id"], f"⌛ Expirou ({hours}h sem aprovação)")
+            log(f"Expirado: {e['hook'][:50]}")
+    save_state(st)
+
+
 def redo_with_new_titles(cfg, st, tg, workdir):
     """Re-render clips whose title the owner changed by replying in Telegram."""
     from .render import render_clip
@@ -98,6 +123,7 @@ def run(cfg, st, dry_run=False):
     tg = None if dry_run else __import__("clipbot.telegram", fromlist=["Telegram"]).Telegram()
 
     if not dry_run:
+        expire_old(cfg, st, tg)
         redo_with_new_titles(cfg, st, tg, workdir)
 
     waiting = sum(1 for c in st["clips"].values() if c["status"] in ("pending", "approved", "rerender"))

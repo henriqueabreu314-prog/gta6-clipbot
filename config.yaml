@@ -33,6 +33,7 @@ search:
   min_views: 300          # ignorar clips com menos visualizações (mais alto = só os mais virais)
   min_duration: 8         # segundos
   max_waiting: 12         # máximo de vídeos à espera (por aprovar + na fila)
+  expire_hours: 48        # vídeos por aprovar há mais de X horas expiram e dão lugar a novos
 
 # Horários de publicação, no fuso horário abaixo.
 # Para público internacional/EUA, a hora de Nova Iorque costuma ser a melhor referência.

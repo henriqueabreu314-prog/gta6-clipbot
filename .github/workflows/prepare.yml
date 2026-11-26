@@ -60,5 +60,5 @@ jobs:
           if-no-files-found: warn
 
       - name: Guardar estado
-        if: ${{ !inputs.dry_run }}
+        if: ${{ !cancelled() && !inputs.dry_run }}
         run: python -m clipbot.savestate 'estado - novos clips'

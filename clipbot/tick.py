@@ -232,6 +232,8 @@ def publish_next(cfg, st, tg):
             storage.delete(clip["hq_asset"])
     elif clip["attempts"] >= MAX_ATTEMPTS:
         clip["status"] = "failed"
+        if clip.get("hq_asset"):
+            storage.delete(clip["hq_asset"])
 
     lines = ["📤 Publicado!" if not errors else "⚠️ Publicação com problemas"]
     lines += [f"{k}: {v}" for k, v in results.items()]

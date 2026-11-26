@@ -113,7 +113,10 @@ def redo_with_new_titles(cfg, st, tg, workdir):
                                                          "tg_file_id", "status", "approved_at", "hq_asset")}
         entry.update(texts)
         entry["created"] = now_iso()  # fresh clock for the 48h expiry
-        _send(tg, cfg, st, key, entry, video)
+        try:
+            _send(tg, cfg, st, key, entry, video)
+        except Exception as ex:
+            log(f"Falhou a enviar o vídeo refeito ({ex}); tenta de novo na próxima procura")
 
 
 def run(cfg, st, dry_run=False):
@@ -135,8 +138,14 @@ def run(cfg, st, dry_run=False):
         return
     need = max(need, 1)
 
+    import time
+    started = time.monotonic()
+    budget = cfg["search"].get("time_budget_min", 60) * 60
     for clip in find_candidates(cfg, st):
         if need <= 0:
+            break
+        if time.monotonic() - started > budget:
+            log("Tempo da procura esgotado; o resto fica para a próxima")
             break
         key = clip_key(clip["id"])
         texts = make_texts(clip, cfg)
@@ -175,5 +184,9 @@ def run(cfg, st, dry_run=False):
             need -= 1
             continue
 
-        _send(tg, cfg, st, key, entry, video)
+        try:
+            _send(tg, cfg, st, key, entry, video)
+        except Exception as e:
+            log(f"Falhou a enviar para o Telegram ({e}); fica para a próxima procura")
+            continue
         need -= 1

@@ -46,4 +46,5 @@ jobs:
         run: python -m clipbot tick ${{ inputs.publish_now && '--publish-now' || '' }}
 
       - name: Guardar estado
+        if: ${{ !cancelled() }}
         run: python -m clipbot.savestate 'estado - aprovações/publicações'

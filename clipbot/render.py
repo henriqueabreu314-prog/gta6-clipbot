@@ -188,7 +188,11 @@ def render_clip(clip, cfg, workdir):
     dur = duration_of(raw)
 
     log("A gerar legendas...")
-    words = transcribe(raw, cfg["whisper"]["model"], cfg["whisper"].get("language"))
+    try:
+        words = transcribe(raw, cfg["whisper"]["model"], cfg["whisper"].get("language"))
+    except subprocess.CalledProcessError:
+        log("Clip sem áudio utilizável; segue sem legendas")
+        words = []
 
     if clip.get("_ai_title"):
         from .titles import make_hook as ai_hook

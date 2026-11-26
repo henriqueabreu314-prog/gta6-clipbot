@@ -13,19 +13,32 @@ from .common import env, log
 API = "https://generativelanguage.googleapis.com/v1beta"
 _model_cache = {}
 
-PROMPT = """You write the on-screen hook title for a YouTube Short / TikTok of a GTA 6 clip from a live streamer.
+PROMPT = """You write the on-screen hook for a viral YouTube Short / TikTok: a GTA 6 clip from a famous live streamer.
+The hook is the ONLY thing viewers read in the first second, so it must make them stop scrolling.
 
 Streamer: {streamer}
-Original clip title (written by a random viewer, often weak): {title}
+Original clip title (written by a random viewer, usually weak): {title}
 What is said in the clip (auto transcript, may contain errors):
 \"\"\"{transcript}\"\"\"
 
-Write ONE title in English that makes people stop scrolling:
-- max {max_chars} characters, punchy, curiosity or humor (like big clip channels: "...goes HORRIBLY wrong", "can't believe...", "POV:")
-- mention the streamer's name naturally when it helps
-- only describe what the transcript/original title support; never invent events that did not happen
-- at most one emoji, at the end; no hashtags, no quotes
-Return JSON: {{"title": "..."}}"""
+Styles that work on the biggest clip channels (adapt, don't copy):
+- Tension/payoff: "{streamer} thought he escaped… then THIS happened"
+- Superlative: "The CRAZIEST police chase in GTA 6 history"
+- Reaction: "{streamer} can't believe what GTA 6 just did"
+- Fail: "{streamer}'s plan goes HORRIBLY wrong in GTA 6"
+- Curiosity gap: "Nobody expected this in Vice City"
+- POV / relatable: "POV: you finally get a 5 star wanted level"
+- Direct quote when the transcript has a funny line: '"I'm never doing that again" - {streamer}'
+
+Rules:
+- English, max {max_chars} characters, Title Case or 1-2 CAPS words for emphasis
+- be specific to THIS clip (use details from the transcript: cops, car, Lucia, heist, money, death, a quote...)
+- never invent events that the transcript or original title don't support; if unsure, use curiosity instead of facts
+- the streamer's name helps search: use it in most options
+- at most one emoji, at the end (💀 😭 😂 🤯 🔥 😳); no hashtags, no quotation marks around the whole title
+
+Write 5 different options in different styles, then pick the one most likely to get clicks.
+Return JSON: {{"options": ["...", "...", "...", "...", "..."], "best": "<the chosen option, copied exactly>"}}"""
 
 
 def configured():
@@ -75,12 +88,14 @@ def make_hook(clip, words, cfg):
             f"{API}/models/{model}:generateContent",
             params={"key": env("GEMINI_API_KEY")},
             json={"contents": [{"parts": [{"text": prompt}]}],
-                  "generationConfig": {"responseMimeType": "application/json", "temperature": 0.9}},
+                  "generationConfig": {"responseMimeType": "application/json", "temperature": 1.0}},
             timeout=60,
         )
         r.raise_for_status()
         text = r.json()["candidates"][0]["content"]["parts"][0]["text"]
-        title = _clean(json.loads(text)["title"], max_chars)
+        data = json.loads(text)
+        best = data.get("best") or data.get("title") or (data.get("options") or [""])[0]
+        title = _clean(best, max_chars)
         if len(title) < 8:
             return None
         log(f"Título IA: {title}")

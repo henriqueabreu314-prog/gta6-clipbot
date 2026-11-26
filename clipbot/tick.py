@@ -193,12 +193,21 @@ def publish_next(cfg, st, tg):
     path.parent.mkdir(exist_ok=True)
     from . import storage
 
-    if clip.get("hq_asset"):
-        storage.load(clip["hq_asset"], path)  # full quality
-    else:
-        tg.download(clip["tg_file_id"], path)  # older clips (max 20 MB)
-
     results, errors = clip.setdefault("published", {}), []
+    got_file = False
+    sources = ([("release", lambda: storage.load(clip["hq_asset"], path))] if clip.get("hq_asset") else []) + \
+              [("telegram", lambda: tg.download(clip["tg_file_id"], path))]
+    for name, fetch in sources:
+        try:
+            fetch()
+            got_file = True
+            break
+        except Exception as e:
+            errors.append(f"Ficheiro ({name}): {str(e)[:200]}")
+    if not got_file:
+        use_yt = use_tt = False  # nothing to upload; counted as a failed attempt below
+    else:
+        errors = []  # a fallback source worked
     if use_yt and "youtube" not in results:
         try:
             results["youtube"] = youtube.upload(

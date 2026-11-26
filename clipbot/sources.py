@@ -27,8 +27,10 @@ MAX_RENDER_ATTEMPTS = 3
 
 def _retryable(entry):
     """New clip, an expired one, or one that failed to render fewer than 3 times."""
-    if entry is None or entry["status"] == "expired":  # expired = never reviewed; offer it again
+    if entry is None:
         return True
+    if entry["status"] == "expired":  # never reviewed: offer it again, but only once
+        return entry.get("expired_count", 1) < 2
     return entry["status"] == "failed" and entry.get("attempts", 1) < MAX_RENDER_ATTEMPTS
 
 

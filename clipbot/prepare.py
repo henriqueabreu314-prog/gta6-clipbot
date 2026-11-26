@@ -77,6 +77,7 @@ def expire_old(cfg, st, tg):
             continue
         if created < limit:
             e["status"] = "expired"
+            e["expired_count"] = e.get("expired_count", 0) + 1
             if e.get("hq_asset"):
                 storage.delete(e["hq_asset"])
             if e.get("tg_message_id"):
@@ -111,6 +112,7 @@ def redo_with_new_titles(cfg, st, tg, workdir):
         entry = {k: v for k, v in e.items() if k not in ("new_hook", "redo_attempts", "tg_message_id",
                                                          "tg_file_id", "status", "approved_at", "hq_asset")}
         entry.update(texts)
+        entry["created"] = now_iso()  # fresh clock for the 48h expiry
         _send(tg, cfg, st, key, entry, video)
 
 
@@ -147,6 +149,9 @@ def run(cfg, st, dry_run=False):
             "moment_group": clip.get("moment_group"), "moment_t": clip.get("moment_t"),
             "created": now_iso(), **texts,
         }
+        previous = st["clips"].get(key) or {}
+        if previous.get("expired_count"):
+            entry["expired_count"] = previous["expired_count"]
         try:
             video = render_clip(clip, cfg, workdir)
         except Exception as e:

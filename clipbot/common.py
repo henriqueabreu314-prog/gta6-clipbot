@@ -42,7 +42,9 @@ def redact(text):
 def diag(*args):
     text = redact(" ".join(str(a) for a in args))
     log(text)
-    DIAG.append(text[:300])
+    text = text[:300]
+    if text not in DIAG:  # the same problem once is enough
+        DIAG.append(text)
 
 
 def now_iso():

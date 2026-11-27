@@ -50,21 +50,22 @@ def configured():
     return bool(env("GEMINI_API_KEY"))
 
 
-def _pick_model(preferred):
-    if preferred in _model_cache:
-        return _model_cache[preferred]
+_bad_models = set()
+
+
+def _candidates(preferred):
+    """Preferred model first, then other text models from the account's list, newest first."""
     r = requests.get(f"{API}/models", headers=_headers(), params={"pageSize": 200}, timeout=30)
     r.raise_for_status()
     names = [m["name"].split("/", 1)[1] for m in r.json().get("models", [])
              if "generateContent" in m.get("supportedGenerationMethods", [])]
-    if preferred in names:
-        choice = preferred
-    else:  # model renamed/retired: use the newest "flash" model available
-        flash = sorted((n for n in names if "flash" in n and "preview" not in n and "exp" not in n), reverse=True)
-        choice = (flash or names)[0]
-        diag(f"Gemini: modelo '{preferred}' indisponível, a usar '{choice}'")
-    _model_cache[preferred] = choice
-    return choice
+
+    def score(n):  # prefer stable flash models, newest version first
+        nums = [float(x) for x in re.findall(r"(\d+(?:\.\d+)?)", n)[:1]] or [0]
+        return ("flash" in n, "latest" in n, not any(t in n for t in ("preview", "exp", "lite", "image", "tts")), nums[0])
+
+    others = sorted((n for n in names if n != preferred), key=score, reverse=True)
+    return [m for m in [preferred] + others if m not in _bad_models]
 
 
 def _clean(text, max_chars):
@@ -88,23 +89,34 @@ def make_hook(clip, words, cfg):
     prompt = PROMPT.format(streamer=clip.get("streamer", ""), title=clip.get("title", ""),
                            transcript=transcript, max_chars=max_chars)
     try:
-        model = _pick_model(tcfg.get("model", "gemini-2.5-flash"))
-        r = requests.post(
-            f"{API}/models/{model}:generateContent",
-            headers=_headers(),
-            json={"contents": [{"parts": [{"text": prompt}]}],
-                  "generationConfig": {"responseMimeType": "application/json", "temperature": 1.0}},
-            timeout=60,
-        )
-        r.raise_for_status()
-        text = r.json()["candidates"][0]["content"]["parts"][0]["text"]
-        data = json.loads(text)
-        best = data.get("best") or data.get("title") or (data.get("options") or [""])[0]
-        title = _clean(best, max_chars)
-        if len(title) < 8:
-            return None
-        log(f"Título IA: {title}")
-        return title
+        cands = _model_cache.get("cands") or _candidates(tcfg.get("model", "gemini-flash-latest"))
+        _model_cache["cands"] = cands
+        last_error = None
+        for model in cands[:4]:
+            r = requests.post(
+                f"{API}/models/{model}:generateContent",
+                headers=_headers(),
+                json={"contents": [{"parts": [{"text": prompt}]}],
+                      "generationConfig": {"responseMimeType": "application/json", "temperature": 1.0}},
+                timeout=60,
+            )
+            if r.status_code in (400, 403, 404):  # model not available for this account: try the next one
+                last_error = f"{model}: {r.status_code} {r.text[:150]}"
+                _bad_models.add(model)
+                continue
+            r.raise_for_status()
+            if model != cands[0]:
+                diag(f"Gemini: a usar o modelo {model}")
+                _model_cache["cands"] = [model] + [c for c in cands if c != model]
+            text = r.json()["candidates"][0]["content"]["parts"][0]["text"]
+            data = json.loads(text)
+            best = data.get("best") or data.get("title") or (data.get("options") or [""])[0]
+            title = _clean(best, max_chars)
+            if len(title) < 8:
+                return None
+            log(f"Título IA: {title}")
+            return title
+        raise RuntimeError(f"nenhum modelo Gemini disponível ({last_error})")
     except Exception as e:
         detail = ""
         resp = getattr(e, "response", None)

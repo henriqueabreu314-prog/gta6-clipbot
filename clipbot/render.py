@@ -46,7 +46,7 @@ def load_audio(path, sr=16000):
 _model = None
 
 
-def transcribe(path, model_size, language):
+def transcribe(path, model_size, language, vad=True):
     global _model
     from faster_whisper import WhisperModel
 
@@ -54,7 +54,7 @@ def transcribe(path, model_size, language):
         log(f"A carregar Whisper '{model_size}'...")
         _model = WhisperModel(model_size, device="cpu", compute_type="int8")
     segments, _ = _model.transcribe(
-        load_audio(path), language=language or None, word_timestamps=True, vad_filter=True
+        load_audio(path), language=language or None, word_timestamps=True, vad_filter=vad
     )
     words = []
     for seg in segments:
@@ -193,6 +193,14 @@ def render_clip(clip, cfg, workdir):
     except subprocess.CalledProcessError:
         log("Clip sem áudio utilizável; segue sem legendas")
         words = []
+    except Exception as e:  # rare faster-whisper errors: retry without the voice filter, else no captions
+        log(f"Legendas falharam ({e}); a tentar sem filtro de voz")
+        try:
+            words = transcribe(raw, cfg["whisper"]["model"], cfg["whisper"].get("language"), vad=False)
+        except Exception as e2:
+            from .common import diag
+            diag(f"Legendas impossíveis ({str(e2)[:120]}); vídeo segue sem legendas")
+            words = []
 
     if clip.get("_ai_title"):
         from .titles import make_hook as ai_hook

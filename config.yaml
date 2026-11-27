@@ -70,7 +70,7 @@ whisper:
 # Sem a chave, ou se falhar, usa o título original do clip.
 titles:
   enabled: true
-  model: "gemini-2.5-flash"
+  model: "gemini-flash-latest"   # se não existir, o bot escolhe sozinho outro modelo flash
 
 # Textos. Variáveis: {hook} {streamer} {url} {channel_url}
 text:
